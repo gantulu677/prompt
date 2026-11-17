@@ -1,0 +1,36 @@
+{
+  "categories": [
+    {
+      "category": "Product Highlight",
+      "subcategories": [
+        "iPhone Spotlight",
+        "MacBook Features",
+        "iPad Experience",
+        "Apple Watch",
+        "AirPods",
+        "Product Showcase"
+      ]
+    },
+    {
+      "category": "Educational & Tips",
+      "subcategories": [
+        "iPhone Tips & Tricks",
+        "iOS Features",
+        "Photography Tips",
+        "Productivity Hacks",
+        "Apple Ecosystem",
+        "Hidden Features"
+      ]
+    },
+    {
+      "category": "Product Launch & Announcement",
+      "subcategories": [
+        "New Arrivals",
+        "Product Launch",
+        "New Features",
+        "Product Availability",
+        "Special Announcements"
+      ]
+    }
+  ]
+}
