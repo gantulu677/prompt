@@ -23,12 +23,12 @@ Core objectives:
 
 ## Product context
 
-- Application name: {{APP_NAME}}
-- Application description: {{APP_DESCRIPTION}}
-- Target users: {{TARGET_USERS}}
-- Primary use case: {{PRIMARY_USE_CASE}}
-- Language: {{APP_LANGUAGE}}
-- Preferred visual direction: {{VISUAL_DIRECTION}}
+- Application name: AI Product Image Studio
+- Application description: A focused AI-powered product image creation workspace for composing reusable visual prompts and producing premium commercial product imagery through capabilities genuinely available in the Gemini Canvas environment.
+- Target users: E-commerce business owners, product marketers, social media content creators, and brand/design teams who need consistent, high-quality product campaign visuals.
+- Primary use case: Create and refine reusable, dynamic prompts for premium product advertising images, including social media campaign and Instagram feed creatives, with configurable product subject, campaign direction, visual style, composition, lighting, color palette, and aspect ratio.
+- Language: Indonesian (Bahasa Indonesia) for the application interface and user-facing guidance; keep technical identifiers and prompt variables in English where appropriate.
+- Preferred visual direction: Premium minimalist editorial aesthetic with refined product-art direction, clean composition, strong visual hierarchy, generous whitespace, sophisticated typography, controlled lighting, and polished commercial photography. The interface should feel modern and professional without copying another brand's proprietary UI.
 
 The application is intended to run within Gemini Canvas. The user expects to use the AI capabilities available in that environment without configuring a separate API key.
 
