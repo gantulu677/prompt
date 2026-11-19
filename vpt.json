@@ -2,10 +2,10 @@
   "version": "1.1",
   "name": "Visual Prompt Template",
   "variables": {
-    "subject": "",
-    "headline": "",
-    "subheadline": "",
-    "feature_items": []
+    "subject": "{{subject}}",
+    "headline": "{{headline}}",
+    "subheadline": "{{subheadline}}",
+    "feature_items": "{{feature_items}}"
   },
   "options": {
     "background": [
@@ -29,5 +29,6 @@
   "fixed": {
     "quality": "8k resolution, ultra-detailed product photography, crisp legible typography, studio lighting, photorealistic",
     "ratio": "4:5 portrait"
-  }
+  },
+  "prompt_template": "Create a premium commercial technology advertising poster featuring {{subject}}.\n\nHEADLINE: {{headline}}\nSUBHEADLINE: {{subheadline}}\nFEATURE ITEMS: {{feature_items}}\n\nBACKGROUND: {{background}}\n\nLAYOUT: {{layout}}\n\nCOMPOSITION: {{composition}}\n\nQUALITY: 8k resolution, ultra-detailed product photography, crisp legible typography, studio lighting, photorealistic.\n\nASPECT RATIO: 4:5 portrait.\n\nEnsure the product is the primary visual focus, all text is accurately rendered and legible, and the overall design is polished, balanced, and suitable for a premium commercial Instagram feed advertisement."
 }
