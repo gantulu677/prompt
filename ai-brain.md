@@ -2,7 +2,7 @@
 document_id: AI-BRAIN
 document_name: External AI Brain Instructions
 document_version: "1.0"
-document_status: proposed
+document_status: active
 runtime_contract_version: "1.2"
 document_type: system_instruction
 last_updated: "2026-11-19"
@@ -440,4 +440,4 @@ The currently audited `index.html` has an image-generation request but does not 
 
 **Document Version:** 1.0  
 **Runtime Contract:** 1.2  
-**Status:** Proposed — Pending Integration Testing
+**Status:** Active — Pending End-to-End Canvas Runtime Testing
