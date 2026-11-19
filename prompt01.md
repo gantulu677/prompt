@@ -67,6 +67,24 @@ Provide:
 
 Support reusable prompt templates and variables, including:
 
+#### AI Auto-Fill Variables
+
+Provide an AI-assisted workflow that automatically proposes values for the prompt variables from a short user brief, rather than requiring the user to complete every field manually.
+
+Core behavior:
+- Provide a concise **Campaign Brief** input. The user should be able to describe the product, campaign objective, audience or key message, and any confirmed promotion details in natural language.
+- Provide an **Auto-Fill with AI** action that analyzes the brief and proposes coherent values for all applicable prompt variables, including subject details, action, scene, background, visual style, composition, camera angle, lighting, color palette, mood, materials, environment, text-content instruction, output requirements, and negative instructions.
+- Automatically enforce the fixed ad format: single-image Portrait Feed Ads, Instagram Feed and Facebook Feed placements, 4:5 aspect ratio, and 1080 × 1350 px target resolution. These fixed values must not be changed by AI suggestions.
+- Keep the campaign brief and user-confirmed facts separate from AI-generated creative suggestions.
+- Display generated values in their corresponding variable fields. Mark AI-proposed values clearly and allow users to edit, accept, regenerate, or reset individual fields.
+- Support regenerating one selected variable or all eligible variables without silently overwriting user-edited or user-locked values. Ask for confirmation before replacing manually edited values.
+- Preserve user-entered product facts, model names, specifications, prices, promotion terms, dates, and store details. Never invent factual product specifications, prices, discounts, availability, campaign dates, warranty claims, or official Apple statements. If a required fact is missing, leave it unresolved and ask the user to supply it.
+- Generate a coherent visual direction across all fields; avoid contradictory lighting, composition, background, color, and mood instructions.
+- Let the user review and edit all proposed values before composing or submitting the final image prompt.
+- Provide clear states for AI assistance: idle, analyzing, suggestions ready, partial completion, unavailable, and failed. Never show successful auto-fill unless values were actually returned and applied.
+- If runtime AI assistance is unavailable, retain manual variable editing and clearly explain that AI auto-fill is not available in the current runtime. Do not simulate AI output with hard-coded sample values or pretend a local template lookup is AI generation.
+
+
 - {{SUBJECT}}
 - {{SUBJECT_DETAILS}}
 - {{ACTION}}
@@ -181,6 +199,7 @@ Recommended logical modules:
 8. **Gallery and History** — manages locally available result metadata and image references.
 9. **Persistence Layer** — stores templates and history only where supported.
 10. **Error and Capability Feedback** — communicates failures and unavailable features.
+11. **AI Variable Assistant** — converts a campaign brief into validated variable suggestions using only a verified runtime AI capability, while preserving user edits and fixed ad-format constraints.
 
 The runtime capability layer must not pretend that a normal JavaScript function can access Gemini's internal model. Its implementation must be based on verified environment support. If no callable native mechanism exists, expose that limitation honestly and keep the prompt builder usable.
 
@@ -199,6 +218,8 @@ Suggested workspace:
 - Header with application name and concise status.
 - Meta Feed Ads format indicator showing Instagram Feed + Facebook Feed, Portrait 4:5, 1080 × 1350 px. Do not offer other placements or creative formats.
 - Prompt editor with subject and detailed description.
+- Campaign Brief input and an **Auto-Fill with AI** action, available only when a genuine runtime AI capability is verified.
+- Variable fields that visibly distinguish AI-proposed, user-edited, accepted, locked, and unresolved values; support per-field regeneration.
 - Configuration panel for visual direction.
 - Final prompt preview.
 - Primary generation action, shown as available only when a genuine generation path exists.
@@ -238,6 +259,23 @@ Suggested entities:
 - currentValue
 - helpText
 
+## CampaignBrief
+- productOrSubject
+- campaignObjective
+- targetAudience (optional)
+- keyMessage (optional)
+- confirmedProductFacts (optional)
+- confirmedOfferDetails (optional)
+- campaignContext (optional)
+- userConstraints (optional)
+
+## VariableSuggestion
+- variableKey
+- proposedValue
+- source (AI-generated or user-provided)
+- status (proposed, accepted, edited, locked, unresolved)
+- generatedAt (only when available)
+
 ## ImageConfiguration
 - subject
 - subjectDetails
@@ -255,6 +293,9 @@ Suggested entities:
 - textContent
 - additionalInstructions
 - negativeInstructions
+- negativeInstructions
+- campaignBrief
+- variableSuggestions (including provenance and review status)
 
 ## GenerationRequest
 - id
@@ -280,6 +321,22 @@ Only store fields that can actually be obtained. Do not fabricate image URLs, bi
 1. User chooses a template or starts from a blank prompt.
 2. User enters the subject and other variable values.
 3. User configures the desired visual direction.
+
+## AI variable auto-fill workflow
+
+1. User enters a short Campaign Brief, providing only the information they know.
+2. The application checks whether a genuine, supported native AI capability is available at runtime.
+3. If available, send the brief, fixed product context, allowed variable schema, and user constraints to that capability.
+4. Request structured suggestions for each applicable variable. The AI must distinguish creative recommendations from factual claims and must not fabricate missing facts.
+5. Validate the returned structure, allowed variable keys, fixed 4:5 / 1080 × 1350 output constraints, and consistency between suggestions.
+6. Populate only empty or explicitly selected fields by default. Preserve user-edited and locked values.
+7. Mark each suggestion as AI-proposed until the user accepts or edits it.
+8. Allow selective regeneration and full regeneration with explicit confirmation before overwriting manually edited values.
+9. Let the user review the complete variable set before final prompt composition.
+10. If runtime AI capability is unavailable or returns invalid data, show an accurate error/unavailable state and leave manual editing usable.
+
+The auto-fill operation must not be confused with image generation. They are separate capabilities and must be discovered, implemented, and validated independently. Do not assume that a working AI-assisted prompt builder implies image generation is available, or vice versa.
+
 4. Prompt Engine resolves variables.
 5. Prompt Engine removes or handles optional empty values.
 6. Prompt validation detects missing required values and unresolved tokens.
@@ -324,6 +381,8 @@ Work in the following order. Do not skip runtime discovery.
 
 - Implement the workspace UI.
 - Implement dynamic variables and template composition.
+- Implement dynamic variables and template composition.
+- Implement AI-assisted variable auto-fill only through a verified native runtime capability; validate structured suggestions, preserve user edits, and provide truthful unavailable/error states.
 - Implement validation and editable final prompt preview.
 - Implement template management.
 
@@ -363,6 +422,17 @@ Validate the following before declaring completion.
 
 ## Prompt engine
 - Variables resolve correctly.
+## AI variable assistant
+- Campaign Brief can be entered in natural language.
+- AI auto-fill uses only a verified runtime AI capability.
+- Suggestions map to known variable keys and are validated before application.
+- Fixed Portrait 4:5 / 1080 × 1350 output settings cannot be altered by AI suggestions.
+- User-provided facts and manually edited or locked values are preserved.
+- AI suggestions are clearly labeled and reviewable before final prompt composition.
+- Individual fields can be regenerated without overwriting unrelated fields.
+- Missing factual campaign details remain unresolved rather than being invented.
+- Unsupported runtime and failed AI responses are communicated accurately; manual editing remains usable.
+
 - Required variables are validated.
 - Optional empty values are handled.
 - Unresolved tokens are detected.
@@ -393,6 +463,7 @@ Deliver the working Gemini Canvas application, not just a design description.
 Provide:
 1. Implemented application UI.
 2. Dynamic Prompt Builder.
+3. AI-assisted variable auto-fill from a concise Campaign Brief, if a genuine native runtime AI capability is available.
 3. Prompt template management.
 4. Image configuration controls.
 5. Verified native image-generation integration, if available.
