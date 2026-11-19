@@ -1,0 +1,37 @@
+{
+  "data": [
+    {
+      "id": "523f98ab-c39c-44c4-87d5-f55a84385bbe",
+      "name": "Visual Prompt Template",
+      "version": "1.1",
+      "subject": "{{subject}}",
+      "headline": "{{headline}}",
+      "subheadline": "{{subheadline}}",
+      "background_options": [
+        "Clean white premium",
+        "black darkness scratch"
+      ],
+      "layout_options": [
+        "Modern commercial tech poster, bold condensed headline at the top, floating hero product in center, clean feature badges aligned neatly at the bottom.",
+        "Bold oversized typography integrated into the composition, hero product positioned diagonally with dynamic visual movement, asymmetric feature placements, modern editorial advertising aesthetic",
+        "Minimalist luxury technology poster, refined headline with elegant typography, hero product prominently displayed with generous negative space, subtle feature information arranged in a sophisticated grid"
+      ],
+      "composition_options": [
+        "Three-quarter dynamic angle, dramatic rim lighting highlighting metallic edges, subtle depth of field",
+        "Front-facing hero product view, symmetrical composition, balanced studio lighting, sharp focus",
+        "Low-angle cinematic perspective, dramatic shadows, atmospheric lighting, strong visual depth",
+        "Product floating in mid-air, dynamic tilted angle, realistic shadows, subtle motion impression",
+        "Close-up macro perspective, emphasizing premium materials, fine textures, intricate product details",
+        "Clean centered product composition, soft diffused lighting, subtle shadows, refined studio atmosphere"
+      ],
+      "quality": "8k resolution, ultra-detailed product photography, crisp legible typography, studio lighting, photorealistic",
+      "ratio": "4:5 portrait",
+      "feature_items": [
+        "{{item_01}}",
+        "{{item_02}}",
+        "{{item_03}}"
+      ],
+      "updated_at": "2026-11-19T12:51:31.003404+00:00"
+    }
+  ]
+}
