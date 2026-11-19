@@ -138,6 +138,28 @@
                     </button>
                 </div>
 
+
+                <!-- AI Brain V2: Product Context -->
+                <details class="rounded-xl border border-purple-500/25 bg-purple-500/5 p-3.5" open>
+                    <summary class="cursor-pointer text-xs font-semibold text-purple-200 flex items-center gap-2">
+                        <i data-lucide="package-search" class="w-4 h-4"></i>
+                        Product Context untuk AI Brain
+                        <span class="ml-auto text-[10px] font-normal text-slate-400">Sumber fakta produk</span>
+                    </summary>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                        <div><label for="context-product-name" class="block text-[11px] font-medium text-slate-300 mb-1">Nama Produk</label><input id="context-product-name" type="text" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-purple-500" placeholder="Contoh: APEX Ultra Pro"></div>
+                        <div><label for="context-product-category" class="block text-[11px] font-medium text-slate-300 mb-1">Kategori</label><input id="context-product-category" type="text" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-purple-500" placeholder="Contoh: Sports Smartwatch"></div>
+                        <div><label for="context-brand" class="block text-[11px] font-medium text-slate-300 mb-1">Brand</label><input id="context-brand" type="text" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-purple-500" placeholder="Nama brand"></div>
+                        <div><label for="context-description" class="block text-[11px] font-medium text-slate-300 mb-1">Deskripsi Produk</label><input id="context-description" type="text" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-purple-500" placeholder="Deskripsi visual dan fungsi produk"></div>
+                        <div class="sm:col-span-2">
+                            <label for="context-specifications" class="block text-[11px] font-medium text-slate-300 mb-1">Spesifikasi Terverifikasi</label>
+                            <textarea id="context-specifications" rows="3" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-purple-500 resize-y" placeholder="Satu fakta/spesifikasi per baris. Contoh:&#10;100M water resistance&#10;14-day battery life&#10;Titanium case"></textarea>
+                            <p class="text-[10px] text-slate-500 mt-1">Masukkan hanya fakta yang sudah dipastikan. AI tidak boleh mengisi spesifikasi yang tidak tersedia.</p>
+                        </div>
+                        <div class="sm:col-span-2"><label for="context-additional" class="block text-[11px] font-medium text-slate-300 mb-1">Konteks Tambahan</label><textarea id="context-additional" rows="2" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-purple-500 resize-y" placeholder="Target audience, positioning, atau batasan copy"></textarea></div>
+                    </div>
+                </details>
+
                 <!-- Subject -->
                 <div>
                     <label for="input-subject" class="block text-xs font-medium text-slate-300 mb-1.5">
@@ -266,9 +288,9 @@
                         </span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs text-slate-300 bg-slate-900/90 border border-slate-700/80 px-2.5 py-1 rounded-lg hover:border-purple-500/50 transition-colors" title="Gunakan aturan dari ai-brain.md untuk menyempurnakan prompt sebelum generate">
+                        <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs text-slate-300 bg-slate-900/90 border border-slate-700/80 px-2.5 py-1 rounded-lg hover:border-purple-500/50 transition-colors" title="Gunakan AI Brain untuk menghasilkan empat variabel konten">
                             <input type="checkbox" id="toggle-ai-brain" checked class="rounded border-slate-600 text-purple-600 focus:ring-purple-500 bg-slate-800">
-                            <span>Aktifkan AI Brain</span>
+                            <span>AI Brain untuk Generate Otomatis</span>
                         </label>
                         <button type="button" onclick="copyPromptToClipboard()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-800 transition-colors">
                             <i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin
@@ -811,7 +833,7 @@ Provide:
             const subject = document.getElementById('input-subject').value.trim();
             const compiledPrompt = document.getElementById('compiled-prompt-preview').value.trim();
             const aspectRatio = document.getElementById('select-ratio').value || "4:5";
-            const useAiBrain = document.getElementById('toggle-ai-brain')?.checked && Boolean(aiBrainInstructions);
+            const useAiBrain = false; // AI Brain V2 tidak mengubah prompt pada tahap image generation.
 
             if (!subject && compiledPrompt.includes('[Describe your main product/subject here]')) {
                 showToast('Harap isi "Subjek Utama / Produk" terlebih dahulu atau klik "Generate Otomatis".', 'warning');
@@ -835,17 +857,7 @@ Provide:
             try {
                 let finalPrompt = compiledPrompt;
 
-                // Tahap 1: Jika AI Brain aktif, optimalkan prompt menggunakan aturan dari ai-brain.md
-                if (useAiBrain) {
-                    loadingSubtext.textContent = 'AI Brain sedang mengoptimalkan komposisi & art direction...';
-                    try {
-                        finalPrompt = await enhancePromptWithAiBrain(compiledPrompt);
-                        document.getElementById('compiled-prompt-preview').value = finalPrompt;
-                    } catch (brainErr) {
-                        console.warn('AI Brain dilewati karena error:', brainErr);
-                        showToast('AI Brain gagal merespons, melanjutkan dengan prompt standar.', 'warning');
-                    }
-                }
+                // AI Brain V2 menghasilkan variabel konten; prompt visual tetap dikendalikan Prompt Compiler dan Master Template.
 
                 // Tahap 2: Render gambar dengan gemini-3.1-flash-image
                 loadingSubtext.textContent = 'Menyusun pencahayaan studio, tata letak, dan tipografi tajam...';
@@ -1030,6 +1042,233 @@ Provide:
                 setTimeout(() => toast.remove(), 300);
             }, 4000);
         }
+
+        // ============================================================
+        // AI BRAIN V2 — Minimal integration layer
+        // Reuses the existing Gemini text request pattern in this file.
+        // ============================================================
+
+        const appState = {
+            brain: { status: 'loading_instructions', metadata: null, error: null },
+            generation: { status: 'idle', requestId: null, error: null }
+        };
+        let aiBrainMetadata = null;
+
+        function parseAiBrainMetadata(markdown) {
+            const match = markdown.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)/);
+            if (!match) throw new Error('BRAIN_INVALID_FRONTMATTER');
+            const metadata = {};
+            match[1].split(/\r?\n/).forEach(line => {
+                const field = line.match(/^([a-zA-Z0-9_]+):\s*(.*?)\s*$/);
+                if (field) metadata[field[1]] = field[2].replace(/^["']|["']$/g, '');
+            });
+            return { metadata, instructions: markdown.slice(match[0].length).trim() };
+        }
+
+        function validateAiBrainMetadata(metadata, instructions) {
+            if (metadata.document_id !== 'AI-BRAIN') throw new Error('BRAIN_INVALID_DOCUMENT_ID');
+            if (metadata.document_version !== '1.0') throw new Error('BRAIN_UNSUPPORTED_VERSION');
+            if (metadata.runtime_contract_version !== '1.2') throw new Error('BRAIN_CONTRACT_MISMATCH');
+            if (metadata.document_type !== 'system_instruction') throw new Error('BRAIN_INVALID_DOCUMENT_TYPE');
+            if (metadata.consumer !== 'index.html') throw new Error('BRAIN_INVALID_CONSUMER');
+            if (metadata.document_status !== 'active') throw new Error('BRAIN_NOT_ACTIVE: ' + (metadata.document_status || 'missing'));
+            if (!instructions) throw new Error('BRAIN_EMPTY_INSTRUCTIONS');
+            return true;
+        }
+
+        async function fetchAiBrain() {
+            const badge = document.getElementById('brain-badge');
+            const badgeText = document.getElementById('brain-badge-text');
+            appState.brain.status = 'loading_instructions';
+            try {
+                const response = await fetch(AI_BRAIN_INSTRUCTION_URL, { headers: { 'Accept': 'text/plain' } });
+                if (!response.ok) throw new Error('BRAIN_FETCH_FAILED: HTTP ' + response.status);
+                const markdown = await response.text();
+                if (!markdown.trim()) throw new Error('BRAIN_EMPTY_DOCUMENT');
+
+                const parsed = parseAiBrainMetadata(markdown);
+                validateAiBrainMetadata(parsed.metadata, parsed.instructions);
+                aiBrainMetadata = parsed.metadata;
+                aiBrainInstructions = parsed.instructions;
+                appState.brain.metadata = parsed.metadata;
+                appState.brain.status = 'ready';
+                badgeText.textContent = 'AI Brain: Aktif v' + parsed.metadata.document_version;
+                badge.className = 'inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+            } catch (error) {
+                aiBrainInstructions = '';
+                aiBrainMetadata = null;
+                appState.brain.metadata = null;
+                appState.brain.error = error.message;
+                appState.brain.status = error.message.includes('BRAIN_NOT_ACTIVE') ? 'inactive' : 'error';
+                badgeText.textContent = appState.brain.status === 'inactive'
+                    ? 'AI Brain: Menunggu aktivasi'
+                    : 'AI Brain: Tidak tersedia';
+                badge.className = 'inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30';
+                console.warn('AI Brain V2 tidak siap:', error);
+            }
+        }
+
+        function collectProductContext() {
+            const value = id => (document.getElementById(id)?.value || '').trim();
+            return {
+                product_name: value('context-product-name'),
+                product_category: value('context-product-category'),
+                brand: value('context-brand'),
+                description: value('context-description'),
+                specifications: value('context-specifications').split(/\r?\n/).map(item => item.trim()).filter(Boolean),
+                verified_facts: [],
+                additional_context: value('context-additional')
+            };
+        }
+
+        function buildAiBrainRequest(productContext) {
+            const requestId = (window.crypto && typeof window.crypto.randomUUID === 'function')
+                ? window.crypto.randomUUID()
+                : 'req-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+            return {
+                contract_version: '1.0',
+                request_id: requestId,
+                instruction: {
+                    document_id: aiBrainMetadata.document_id,
+                    document_version: aiBrainMetadata.document_version
+                },
+                product_context: productContext,
+                generation_options: { language: 'English', feature_item_count: 3 }
+            };
+        }
+
+        function parseAiBrainResponse(rawText) {
+            if (!rawText || !rawText.trim()) throw new Error('AI_RESPONSE_EMPTY');
+            return JSON.parse(rawText.trim().replace(/^\uFEFF/, ''));
+        }
+
+        function validateAiBrainResponse(response, requestId) {
+            if (!response || typeof response !== 'object' || Array.isArray(response)) throw new Error('AI_RESPONSE_NOT_OBJECT');
+            if (response.contract_version !== '1.0') throw new Error('AI_CONTRACT_VERSION_MISMATCH');
+            if (response.request_id !== requestId) throw new Error('AI_REQUEST_ID_MISMATCH');
+
+            if (response.status === 'needs_input') {
+                if (!Array.isArray(response.required_information)) throw new Error('AI_NEEDS_INPUT_INVALID');
+                return { status: 'needs_input', required_information: response.required_information };
+            }
+            if (response.status === 'error') {
+                throw new Error(response.error?.code || response.error?.message || 'AI_PROCESSING_ERROR');
+            }
+            if (response.status !== 'success') throw new Error('AI_STATUS_INVALID');
+
+            const data = response.data;
+            if (!data || typeof data !== 'object') throw new Error('AI_DATA_MISSING');
+            ['subject', 'headline', 'subheadline'].forEach(field => {
+                if (typeof data[field] !== 'string' || !data[field].trim()) throw new Error('AI_FIELD_INVALID: ' + field);
+            });
+            if (!Array.isArray(data.feature_items) || data.feature_items.length !== 3 ||
+                data.feature_items.some(item => typeof item !== 'string' || !item.trim())) {
+                throw new Error('AI_FEATURE_ITEMS_INVALID');
+            }
+            if (response.validation?.passed !== true ||
+                !Array.isArray(response.validation.errors) ||
+                response.validation.errors.length !== 0) throw new Error('AI_VALIDATION_NOT_PASSED');
+            return { status: 'success', data };
+        }
+
+        async function executeAiBrain(request) {
+            if (appState.brain.status !== 'ready' || !aiBrainInstructions || !aiBrainMetadata) {
+                throw new Error('AI_BRAIN_NOT_READY');
+            }
+            // Same text endpoint, model and fetchWithRetry pattern already used by the original application.
+            const flashUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=' + apiKey;
+            const payload = {
+                systemInstruction: { parts: [{ text: aiBrainInstructions }] },
+                contents: [{
+                    role: 'user',
+                    parts: [{
+                        text: 'Follow the external AI Brain instructions. Treat the following object as the complete request contract. Return exactly one JSON object matching the documented response contract, without markdown or prose. Do not invent product facts.\n\n' +
+                            JSON.stringify(request)
+                    }]
+                }],
+                generationConfig: { responseMimeType: 'application/json' }
+            };
+            const result = await fetchWithRetry(flashUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const rawText = result?.candidates?.[0]?.content?.parts?.find(part => typeof part.text === 'string')?.text;
+            return validateAiBrainResponse(parseAiBrainResponse(rawText), request.request_id);
+        }
+
+        async function autoGenerateProductConcept() {
+            const button = document.getElementById('btn-auto-generate');
+            const context = collectProductContext();
+            const hasContext = Boolean(context.product_name || context.product_category ||
+                context.description || context.specifications.length || context.additional_context);
+
+            if (!hasContext) {
+                showToast('Isi Product Context terlebih dahulu. AI tidak akan membuat spesifikasi produk secara acak.', 'warning');
+                document.getElementById('context-product-name')?.focus();
+                return;
+            }
+            if (!document.getElementById('toggle-ai-brain')?.checked) {
+                showToast('Aktifkan AI Brain untuk menjalankan empat logical generators.', 'warning');
+                return;
+            }
+            if (appState.brain.status !== 'ready') {
+                showToast('AI Brain belum aktif. Periksa status dokumen ai-brain.md.', 'warning');
+                return;
+            }
+            if (appState.generation.status === 'running') return;
+
+            const originalButton = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>AI Brain bekerja...</span>';
+            lucide.createIcons({ root: button });
+            appState.generation.status = 'running';
+            appState.generation.error = null;
+
+            try {
+                const request = buildAiBrainRequest(context);
+                appState.generation.requestId = request.request_id;
+                const result = await executeAiBrain(request);
+                if (appState.generation.requestId !== request.request_id) return;
+
+                if (result.status === 'needs_input') {
+                    appState.generation.status = 'needs_input';
+                    showToast('Informasi produk belum cukup: ' + result.required_information.join(', '), 'warning');
+                    return;
+                }
+
+                const data = result.data;
+                document.getElementById('input-subject').value = data.subject.trim();
+                document.getElementById('input-headline').value = data.headline.trim();
+                document.getElementById('input-subheadline').value = data.subheadline.trim();
+
+                const featureContainer = document.getElementById('feature-items-container');
+                featureContainer.innerHTML = '';
+                data.feature_items.forEach((feature, index) => {
+                    addFeatureInput('', index);
+                    featureContainer.querySelectorAll('[data-feature-input="true"]')[index].value = feature.trim();
+                });
+                updatePromptPreview();
+                appState.generation.status = 'success';
+                showToast('AI Brain berhasil menghasilkan empat variabel konten.', 'success');
+            } catch (error) {
+                appState.generation.status = 'error';
+                appState.generation.error = error.message;
+                console.error('AI Brain V2 generation failed:', error);
+                showToast('AI Brain gagal: ' + error.message, 'error');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalButton;
+                lucide.createIcons({ root: button });
+                if (appState.generation.status === 'running') appState.generation.status = 'idle';
+            }
+        }
+
+        // Content generation and image prompt enhancement are separate responsibilities.
+        async function enhancePromptWithAiBrain(rawPrompt) {
+            return rawPrompt;
+        }
+
     </script>
 </body>
 </html>
