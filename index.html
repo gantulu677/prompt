@@ -680,7 +680,6 @@
             const subject = document.getElementById('input-subject').value.trim();
             const compiledPrompt = document.getElementById('compiled-prompt-preview').value.trim();
             const aspectRatio = document.getElementById('select-ratio').value || "4:5";
-            const useAiBrain = false; // AI Brain V2 tidak mengubah prompt pada tahap image generation.
 
             if (!subject && compiledPrompt.includes('[Describe your main product/subject here]')) {
                 showToast('Harap isi "Subjek Utama / Produk" terlebih dahulu atau klik "Generate Otomatis".', 'warning');
@@ -1111,10 +1110,6 @@
             }
         }
 
-        // Content generation and image prompt enhancement are separate responsibilities.
-        async function enhancePromptWithAiBrain(rawPrompt) {
-            return rawPrompt;
-        }
 
     </script>
 </body>
