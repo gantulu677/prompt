@@ -8,7 +8,7 @@ Do not merely describe a proposed application. Implement the application to the 
 
 # OBJECTIVE
 
-Create an AI Image Generator application that lets users compose image prompts, configure visual direction, request image generation through capabilities genuinely available in the Gemini Canvas session, and review generated results.
+Create a specialized AI visual-creative application for producing single-image Portrait Feed Ads for Instagram Feed and Facebook Feed, focused on Apple products and retail campaigns for The Exchange TRX, Kuala Lumpur. The application lets users compose dynamic image prompts, configure campaign visuals, request image generation through capabilities genuinely available in the Gemini Canvas session, and review generated results. The only supported ad creative format is Portrait Feed Ads at a 4:5 aspect ratio and 1080 × 1350 px output target.
 
 Core objectives:
 
@@ -24,9 +24,9 @@ Core objectives:
 ## Product context
 
 - Application name: Apple The Exchange TRX Instagram Feed Studio
-- Application description: A specialized AI image-prompting workspace for creating premium Instagram feed visuals featuring Apple products for the Apple retail presence at The Exchange TRX, Kuala Lumpur, Malaysia. The application helps users produce consistent product-focused campaign artwork, promotional creatives, launch announcements, and editorial-style social content.
+- Application description: A specialized AI image-prompting workspace for creating premium single-image Meta Feed Ads featuring Apple products for the Apple retail presence at The Exchange TRX, Kuala Lumpur, Malaysia. It supports Instagram Feed and Facebook Feed placements exclusively, using Portrait Feed Ads at 4:5 (1080 × 1350 px).
 - Target users: The social media, marketing, and creative-content team responsible for planning and producing Instagram feed content for the Apple product retail presence at The Exchange TRX in Kuala Lumpur, Malaysia.
-- Primary use case: Create and refine reusable, dynamic prompts for Instagram feed images featuring Apple products and retail campaigns. Support product spotlights, feature highlights, new-product announcements, promotional campaigns, seasonal content, and store-related content, with configurable product subject, campaign objective, visual direction, composition, lighting, color palette, background, and feed aspect ratio.
+- Primary use case: Create and refine reusable, dynamic prompts for single-image Portrait Feed Ads featuring Apple products and retail campaigns. Support product spotlights, feature highlights, new-product announcements, promotional campaigns, seasonal content, and store-related content, with configurable product subject, campaign objective, visual direction, composition, lighting, color palette, and background. The only ad placements in scope are Instagram Feed and Facebook Feed; the only creative format is portrait 4:5 at a target resolution of 1080 × 1350 px. Do not add Stories, Reels, Carousel, Collection, landscape, or square ad formats.
 - Language: Indonesian (Bahasa Indonesia) for application controls and guidance. Allow the user to define the language of image text and campaign copy separately, with English and Bahasa Malaysia as practical content options for the Kuala Lumpur audience. Do not automatically place text inside generated images unless the user requests it.
 - Preferred visual direction: Premium Apple-inspired editorial minimalism: product-first composition, precise details, clean geometry, generous negative space, refined typography, subtle gradients, sophisticated studio lighting, and restrained colors. Keep product appearance accurate to the supplied reference and avoid altering logos, ports, camera layouts, finishes, or other identifying product details. Use a polished retail-campaign aesthetic suitable for Instagram. Do not imply that the application or its output is officially endorsed, operated, or published by Apple unless the user explicitly confirms authorization.
 
@@ -77,7 +77,9 @@ Support reusable prompt templates and variables, including:
 - {{CAMERA_ANGLE}}
 - {{LIGHTING}}
 - {{COLOR_PALETTE}}
-- {{ASPECT_RATIO}}
+- {{ASPECT_RATIO}} (fixed: 4:5)
+- {{OUTPUT_RESOLUTION}} (fixed target: 1080x1350)
+- {{CAMPAIGN_OBJECTIVE}}
 - {{MOOD}}
 - {{MATERIALS}}
 - {{ENVIRONMENT}}
@@ -98,9 +100,11 @@ Requirements:
 
 Offer practical controls for:
 - Subject and subject details.
+- Campaign objective.
 - Visual style.
-- Composition and framing.
-- Aspect ratio.
+- Composition and framing optimized for portrait 4:5.
+- Aspect ratio fixed to 4:5; do not expose other aspect-ratio choices.
+- Output resolution target fixed to 1080 × 1350 px.
 - Camera angle and perspective.
 - Lighting.
 - Color palette.
@@ -193,6 +197,7 @@ Suggested navigation:
 
 Suggested workspace:
 - Header with application name and concise status.
+- Meta Feed Ads format indicator showing Instagram Feed + Facebook Feed, Portrait 4:5, 1080 × 1350 px. Do not offer other placements or creative formats.
 - Prompt editor with subject and detailed description.
 - Configuration panel for visual direction.
 - Final prompt preview.
@@ -236,9 +241,11 @@ Suggested entities:
 ## ImageConfiguration
 - subject
 - subjectDetails
+- campaignObjective
 - visualStyle
 - composition
-- aspectRatio
+- aspectRatio (fixed: 4:5)
+- outputResolution (fixed target: 1080 × 1350 px)
 - cameraAngle
 - lighting
 - colorPalette
@@ -371,6 +378,7 @@ Validate the following before declaring completion.
 - Gallery and history reflect actual operations.
 - Storage failures are handled.
 - Layout works on desktop and mobile.
+- The creative configuration offers only single-image Portrait Feed Ads for Instagram Feed and Facebook Feed, with 4:5 aspect ratio and 1080 × 1350 px target output. No Stories, Reels, Carousel, Collection, square, or landscape options are present.
 
 ## Acceptance criteria
 
