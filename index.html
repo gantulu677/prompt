@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Poster & Visual Produk AI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar untuk tampilan yang bersih */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.4);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.7);
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .shimmer {
+            background: linear-gradient(90deg, rgba(30,41,59,0) 0%, rgba(99,102,241,0.15) 50%, rgba(30,41,59,0) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.8s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+    <!-- Navbar / Header -->
+    <header class="sticky top-0 z-30 glass-panel border-b border-slate-800/80 px-4 sm:px-6 py-3.5">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-display font-bold text-lg sm:text-xl tracking-tight text-white flex items-center gap-2">
+                        Studio Visual AI
+                        <span id="template-version-badge" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30 hidden">v1.0</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Generator Poster Komersial Berbasis Template Dinamis</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div id="api-status-pill" class="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-slate-400">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" id="api-status-dot"></span>
+                    <span id="api-status-text">Memuat Template...</span>
+                </div>
+                <button onclick="fetchTemplates()" title="Muat Ulang Template dari API" class="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-all active:scale-95">
+                    <i data-lucide="refresh-cw" id="refresh-icon" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast / Notification Container (Menggantikan alert()) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- Kolom Kiri: Konfigurasi Template & Form Input (7 Kolom di Desktop) -->
+        <div class="lg:col-span-7 flex flex-col gap-5">
+
+            <!-- Kartu 1: Pemilihan Master Template -->
+            <section class="glass-panel rounded-2xl p-5 shadow-xl">
+                <div class="flex items-center justify-between mb-3">
+                    <label for="template-select" class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                        <i data-lucide="layout-template" class="w-4 h-4 text-brand-400"></i>
+                        Pilih Master Template
+                    </label>
+                    <span id="template-updated" class="text-[11px] text-slate-500"></span>
+                </div>
+                <div class="relative">
+                    <select id="template-select" onchange="onTemplateChange()" class="w-full appearance-none bg-slate-900/90 border border-slate-700/80 hover:border-brand-500/50 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 rounded-xl px-4 py-3 pr-10 text-sm text-white outline-none transition-all">
+                        <option value="">Sedang mengambil daftar template...</option>
+                    </select>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                </div>
+            </section>
+
+            <!-- Kartu 2: Variabel Konten Utama (Subject, Headline, Subheadline, Features) -->
+            <section class="glass-panel rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+                <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
+                    <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                        <i data-lucide="type" class="w-4 h-4 text-brand-400"></i>
+                        Konten & Variabel Produk
+                    </h2>
+                    <button type="button" onclick="fillSampleData()" class="text-xs text-brand-400 hover:text-brand-300 font-medium flex items-center gap-1 px-2.5 py-1 rounded-lg bg-brand-500/10 hover:bg-brand-500/20 transition-colors">
+                        <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
+                        Isi Contoh Produk
+                    </button>
+                </div>
+
+                <!-- Subject -->
+                <div>
+                    <label for="input-subject" class="block text-xs font-medium text-slate-300 mb-1.5">
+                        Subjek Utama / Produk <span class="text-rose-400">*</span>
+                        <span class="text-slate-500 font-normal ml-1">({{subject}})</span>
+                    </label>
+                    <input type="text" id="input-subject" oninput="updatePromptPreview()" placeholder="Contoh: Headphone nirkabel hitam matte dengan aksen metalik emas" class="w-full bg-slate-900/90 border border-slate-700/80 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition-all">
+                </div>
+
+                <!-- Headline & Subheadline -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="input-headline" class="block text-xs font-medium text-slate-300 mb-1.5">
+                            Judul Utama (Headline)
+                            <span class="text-slate-500 font-normal ml-1">({{headline}})</span>
+                        </label>
+                        <input type="text" id="input-headline" oninput="updatePromptPreview()" placeholder="Contoh: SOUND BEYOND LIMITS" class="w-full bg-slate-900/90 border border-slate-700/80 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label for="input-subheadline" class="block text-xs font-medium text-slate-300 mb-1.5">
+                            Sub-Judul (Subheadline)
+                            <span class="text-slate-500 font-normal ml-1">({{subheadline}})</span>
+                        </label>
+                        <input type="text" id="input-subheadline" oninput="updatePromptPreview()" placeholder="Contoh: Active Noise Cancellation Pro" class="w-full bg-slate-900/90 border border-slate-700/80 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition-all">
+                    </div>
+                </div>
+
+                <!-- Feature Items Dinamis -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-medium text-slate-300">
+                            Poin Fitur / Badge Produk
+                            <span class="text-slate-500 font-normal ml-1">(feature_items)</span>
+                        </label>
+                        <button type="button" onclick="addFeatureInput()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Item
+                        </button>
+                    </div>
+                    <div id="feature-items-container" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <!-- Diisi secara dinamis dari array feature_items template -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Kartu 3: Pengaturan Gaya Visual & Komposisi -->
+            <section class="glass-panel rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+                <div class="border-b border-slate-800 pb-3">
+                    <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                        <i data-lucide="sliders" class="w-4 h-4 text-brand-400"></i>
+                        Gaya Visual, Tata Letak & Rasio
+                    </h2>
+                </div>
+
+                <!-- Background Options -->
+                <div>
+                    <label for="select-background" class="block text-xs font-medium text-slate-300 mb-1.5">
+                        Pilihan Latar Belakang <span class="text-slate-500 font-normal">(background_options)</span>
+                    </label>
+                    <div class="relative">
+                        <select id="select-background" onchange="updatePromptPreview()" class="w-full appearance-none bg-slate-900/90 border border-slate-700/80 focus:border-brand-500 rounded-xl px-3.5 py-2.5 pr-10 text-sm text-white outline-none transition-all"></select>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <!-- Layout Options -->
+                <div>
+                    <label for="select-layout" class="block text-xs font-medium text-slate-300 mb-1.5">
+                        Konsep Tata Letak Poster <span class="text-slate-500 font-normal">(layout_options)</span>
+                    </label>
+                    <div class="relative">
+                        <select id="select-layout" onchange="updatePromptPreview()" class="w-full appearance-none bg-slate-900/90 border border-slate-700/80 focus:border-brand-500 rounded-xl px-3.5 py-2.5 pr-10 text-sm text-white outline-none transition-all"></select>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    </div>
+                    <p id="layout-description-preview" class="mt-1.5 text-xs text-slate-400 bg-slate-900/50 p-2.5 rounded-lg border border-slate-800/80 leading-relaxed"></p>
+                </div>
+
+                <!-- Composition Options -->
+                <div>
+                    <label for="select-composition" class="block text-xs font-medium text-slate-300 mb-1.5">
+                        Sudut Kamera & Pencahayaan <span class="text-slate-500 font-normal">(composition_options)</span>
+                    </label>
+                    <div class="relative">
+                        <select id="select-composition" onchange="updatePromptPreview()" class="w-full appearance-none bg-slate-900/90 border border-slate-700/80 focus:border-brand-500 rounded-xl px-3.5 py-2.5 pr-10 text-sm text-white outline-none transition-all"></select>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    </div>
+                    <p id="composition-description-preview" class="mt-1.5 text-xs text-slate-400 bg-slate-900/50 p-2.5 rounded-lg border border-slate-800/80 leading-relaxed"></p>
+                </div>
+
+                <!-- Aspect Ratio & Quality -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="select-ratio" class="block text-xs font-medium text-slate-300 mb-1.5">
+                            Rasio Aspek Gambar <span class="text-slate-500 font-normal">(ratio)</span>
+                        </label>
+                        <div class="relative">
+                            <select id="select-ratio" onchange="updatePromptPreview()" class="w-full appearance-none bg-slate-900/90 border border-slate-700/80 focus:border-brand-500 rounded-xl px-3.5 py-2.5 pr-10 text-sm text-white outline-none transition-all">
+                                <option value="4:5">4:5 Portrait (Poster / IG Feed)</option>
+                                <option value="1:1">1:1 Square (Persegi)</option>
+                                <option value="9:16">9:16 Vertical (Story / Reels)</option>
+                                <option value="16:9">16:9 Landscape (Banner / Web)</option>
+                                <option value="3:4">3:4 Portrait</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="input-quality" class="block text-xs font-medium text-slate-300 mb-1.5">
+                            Parameter Kualitas <span class="text-slate-500 font-normal">(quality)</span>
+                        </label>
+                        <input type="text" id="input-quality" oninput="updatePromptPreview()" class="w-full bg-slate-900/90 border border-slate-700/80 focus:border-brand-500 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 outline-none transition-all">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Kartu 4: Pratinjau Prompt Akhir & Tombol Generate -->
+            <section class="glass-panel rounded-2xl p-5 shadow-xl flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                        <i data-lucide="terminal" class="w-3.5 h-3.5 text-brand-400"></i>
+                        Prompt Terkompilasi
+                    </span>
+                    <button type="button" onclick="copyPromptToClipboard()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-800 transition-colors">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin Prompt
+                    </button>
+                </div>
+                <textarea id="compiled-prompt-preview" rows="4" class="w-full bg-slate-950/90 border border-slate-800 focus:border-brand-500/60 rounded-xl p-3 text-xs font-mono text-slate-300 leading-relaxed outline-none resize-y" placeholder="Prompt akhir akan muncul di sini..."></textarea>
+
+                <button id="btn-generate" onclick="generateImage()" class="mt-1 w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-brand-600 via-brand-500 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-semibold text-sm sm:text-base shadow-lg shadow-brand-600/30 hover:shadow-brand-500/40 transition-all active:scale-[0.99] flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    <span>Buat Gambar Sekarang</span>
+                </button>
+            </section>
+        </div>
+
+        <!-- Kolom Kanan: Hasil Render Gambar & Riwayat (5 Kolom di Desktop) -->
+        <div class="lg:col-span-5 lg:sticky lg:top-24 flex flex-col gap-5">
+            <section class="glass-panel rounded-2xl p-5 shadow-2xl flex flex-col gap-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                        <i data-lucide="image" class="w-4 h-4 text-brand-400"></i>
+                        Hasil Visual
+                    </h2>
+                    <span id="render-ratio-badge" class="text-xs font-mono px-2.5 py-0.5 rounded-md bg-slate-900 border border-slate-700 text-slate-300">4:5</span>
+                </div>
+
+                <!-- Kanvas / Viewport Gambar -->
+                <div id="image-viewport" class="relative w-full min-h-[380px] sm:min-h-[440px] rounded-xl bg-slate-900/90 border border-slate-800 overflow-hidden flex items-center justify-center group">
+                    
+                    <!-- Placeholder Awal -->
+                    <div id="empty-state" class="flex flex-col items-center justify-center text-center p-6 max-w-xs">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-center mb-4 text-slate-400">
+                            <i data-lucide="image-plus" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-sm font-semibold text-slate-200 mb-1">Siap Membuat Visual</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Isi detail produk dan pilih gaya komposisi di sebelah kiri, lalu klik <strong>Buat Gambar Sekarang</strong>.
+                        </p>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="loading-state" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-6 text-center">
+                        <div class="relative w-16 h-16 mb-4">
+                            <div class="absolute inset-0 rounded-full border-4 border-brand-500/20"></div>
+                            <div class="absolute inset-0 rounded-full border-4 border-brand-500 border-t-transparent animate-spin"></div>
+                            <i data-lucide="sparkles" class="w-6 h-6 text-brand-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white mb-1">Merender Poster Produk...</p>
+                        <p id="loading-subtext" class="text-xs text-slate-400 max-w-xs">Menyusun pencahayaan studio, tata letak, dan tipografi tajam</p>
+                    </div>
+
+                    <!-- Gambar Hasil -->
+                    <img id="generated-image" src="" alt="Hasil Render AI" class="hidden w-full h-auto max-h-[600px] object-contain rounded-lg transition-all duration-300" />
+                </div>
+
+                <!-- Tombol Aksi Hasil Gambar -->
+                <div id="result-actions" class="hidden grid grid-cols-2 gap-3">
+                    <button onclick="downloadGeneratedImage()" class="py-2.5 px-4 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-medium flex items-center justify-center gap-2 transition-all shadow-md shadow-brand-600/20">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        Unduh PNG
+                    </button>
+                    <button onclick="openFullscreenModal()" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium flex items-center justify-center gap-2 transition-all border border-slate-700">
+                        <i data-lucide="maximize-2" class="w-4 h-4"></i>
+                        Perbesar
+                    </button>
+                </div>
+
+                <!-- Mini Galeri Riwayat Sesi -->
+                <div id="history-section" class="hidden pt-3 border-t border-slate-800/80">
+                    <div class="flex items-center justify-between mb-2.5">
+                        <span class="text-xs font-medium text-slate-400">Riwayat Generasi Sesi Ini</span>
+                        <span id="history-count" class="text-[11px] text-slate-500">0 gambar</span>
+                    </div>
+                    <div id="history-grid" class="grid grid-cols-4 gap-2"></div>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- Modal Fullscreen Preview -->
+    <div id="fullscreen-modal" onclick="closeFullscreenModal()" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 sm:p-8">
+        <button onclick="closeFullscreenModal()" class="absolute top-5 right-5 p-3 rounded-full bg-slate-800/90 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <img id="modal-image" src="" alt="Pratinjau Layar Penuh" onclick="event.stopPropagation()" class="max-w-full max-h-[90vh] rounded-xl shadow-2xl border border-slate-800 object-contain">
+    </div>
+
+    <script>
+        // Konfigurasi Endpoint API
+        const TEMPLATE_API_URL = 'https://raw.githubusercontent.com/gantulu677/prompt/refs/heads/main/master-prompt.json';
+        const apiKey = ""; // Disediakan otomatis oleh runtime environment
+
+        // State Aplikasi
+        let templatesList = [];
+        let currentTemplate = null;
+        let currentImageBase64 = null;
+        let generationHistory = [];
+
+        // Data fallback jika API mengalami gangguan jaringan sementara
+        const FALLBACK_TEMPLATE_DATA = [
+            {
+                "id": "523f98ab-c39c-44c4-87d5-f55a84385bbe",
+                "name": "Visual Prompt Template (Fallback)",
+                "version": "1.1",
+                "subject": "{{subject}}",
+                "headline": "{{headline}}",
+                "subheadline": "{{subheadline}}",
+                "background_options": [
+                    "Clean white premium",
+                    "black darkness scratch"
+                ],
+                "layout_options": [
+                    "Modern commercial tech poster, bold condensed headline at the top, floating hero product in center, clean feature badges aligned neatly at the bottom.",
+                    "Bold oversized typography integrated into the composition, hero product positioned diagonally with dynamic visual movement, asymmetric feature placements, modern editorial advertising aesthetic",
+                    "Minimalist luxury technology poster, refined headline with elegant typography, hero product prominently displayed with generous negative space, subtle feature information arranged in a sophisticated grid"
+                ],
+                "composition_options": [
+                    "Three-quarter dynamic angle, dramatic rim lighting highlighting metallic edges, subtle depth of field",
+                    "Front-facing hero product view, symmetrical composition, balanced studio lighting, sharp focus",
+                    "Low-angle cinematic perspective, dramatic shadows, atmospheric lighting, strong visual depth",
+                    "Product floating in mid-air, dynamic tilted angle, realistic shadows, subtle motion impression",
+                    "Close-up macro perspective, emphasizing premium materials, fine textures, intricate product details",
+                    "Clean centered product composition, soft diffused lighting, subtle shadows, refined studio atmosphere"
+                ],
+                "quality": "8k resolution, ultra-detailed product photography, crisp legible typography, studio lighting, photorealistic",
+                "ratio": "4:5 portrait",
+                "feature_items": [
+                    "{{item_01}}",
+                    "{{item_02}}",
+                    "{{item_03}}"
+                ],
+                "updated_at": "2026-11-19T12:51:31.003404+00:00"
+            }
+        ];
+
+        // Inisialisasi saat halaman dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            fetchTemplates();
+        });
+
+        /**
+         * Menampilkan notifikasi toast non-blocking (menggantikan alert())
+         */
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const styles = {
+                success: 'bg-emerald-950/90 border-emerald-500/40 text-emerald-200',
+                error: 'bg-rose-950/90 border-rose-500/40 text-rose-200',
+                warning: 'bg-amber-950/90 border-amber-500/40 text-amber-200',
+                info: 'bg-slate-900/95 border-brand-500/40 text-slate-200'
+            };
+
+            const icons = {
+                success: 'check-circle-2',
+                error: 'alert-circle',
+                warning: 'alert-triangle',
+                info: 'info'
+            };
+
+            toast.className = `pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border shadow-xl backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 ${styles[type] || styles.info}`;
+            toast.innerHTML = `
+                <i data-lucide="${icons[type] || 'info'}" class="w-4 h-4 mt-0.5 shrink-0"></i>
+                <p class="text-xs leading-relaxed flex-1">${message}</p>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons({ root: toast });
+
+            // Animasi masuk
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            // Hapus otomatis setelah 4.5 detik
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4500);
+        }
+
+        /**
+         * Mengambil daftar Master Template dari API Supabase
+         */
+        async function fetchTemplates() {
+            const statusDot = document.getElementById('api-status-dot');
+            const statusText = document.getElementById('api-status-text');
+            const refreshIcon = document.getElementById('refresh-icon');
+            const selectEl = document.getElementById('template-select');
+
+            refreshIcon.classList.add('animate-spin');
+            statusDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+            statusText.textContent = 'Menghubungkan API...';
+
+            try {
+                const response = await fetch(TEMPLATE_API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const json = await response.json();
+                const data = Array.isArray(json) ? json : (json.data || []);
+
+                if (!data || data.length === 0) {
+                    throw new Error('Data template dari API kosong.');
+                }
+
+                templatesList = data;
+                statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+                statusText.textContent = `Terhubung (${templatesList.length} Template)`;
+                showToast('Berhasil memuat master template dari API.', 'success');
+
+            } catch (error) {
+                console.warn('Gagal mengambil dari API langsung, menggunakan template fallback:', error);
+                templatesList = FALLBACK_TEMPLATE_DATA;
+                statusDot.className = 'w-2 h-2 rounded-full bg-amber-400';
+                statusText.textContent = 'Mode Offline / Fallback';
+                showToast('Menggunakan struktur template cadangan karena koneksi API terbatas.', 'warning');
+            } finally {
+                refreshIcon.classList.remove('animate-spin');
+                populateTemplateDropdown();
+            }
+        }
+
+        /**
+         * Mengisi dropdown pilihan master template
+         */
+        function populateTemplateDropdown() {
+            const selectEl = document.getElementById('template-select');
+            selectEl.innerHTML = '';
+
+            templatesList.forEach((tpl, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${tpl.name || 'Template Tanpa Nama'} ${tpl.version ? `(v${tpl.version})` : ''}`;
+                selectEl.appendChild(option);
+            });
+
+            if (templatesList.length > 0) {
+                selectEl.value = "0";
+                onTemplateChange();
+            }
+        }
+
+        /**
+         * Dipicu saat user memilih template berbeda dari dropdown
+         */
+        function onTemplateChange() {
+            const index = parseInt(document.getElementById('template-select').value, 10);
+            if (isNaN(index) || !templatesList[index]) return;
+
+            currentTemplate = templatesList[index];
+
+            // Update badge versi & tanggal update
+            const versionBadge = document.getElementById('template-version-badge');
+            if (currentTemplate.version) {
+                versionBadge.textContent = `v${currentTemplate.version}`;
+                versionBadge.classList.remove('hidden');
+            } else {
+                versionBadge.classList.add('hidden');
+            }
+
+            const updatedEl = document.getElementById('template-updated');
+            if (currentTemplate.updated_at) {
+                const dateObj = new Date(currentTemplate.updated_at);
+                updatedEl.textContent = `Diperbarui: ${dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+            } else {
+                updatedEl.textContent = '';
+            }
+
+            // Isi Background Options
+            const bgSelect = document.getElementById('select-background');
+            bgSelect.innerHTML = '';
+            (currentTemplate.background_options || ['Clean studio background']).forEach(bg => {
+                const opt = document.createElement('option');
+                opt.value = bg;
+                opt.textContent = bg;
+                bgSelect.appendChild(opt);
+            });
+
+            // Isi Layout Options
+            const layoutSelect = document.getElementById('select-layout');
+            layoutSelect.innerHTML = '';
+            (currentTemplate.layout_options || []).forEach((layout, idx) => {
+                const opt = document.createElement('option');
+                opt.value = layout;
+                // Potong teks panjang untuk label dropdown agar rapi
+                const shortLabel = layout.length > 65 ? layout.substring(0, 65) + '...' : layout;
+                opt.textContent = `Gaya ${idx + 1}: ${shortLabel}`;
+                layoutSelect.appendChild(opt);
+            });
+
+            // Isi Composition Options
+            const compSelect = document.getElementById('select-composition');
+            compSelect.innerHTML = '';
+            (currentTemplate.composition_options || []).forEach((comp, idx) => {
+                const opt = document.createElement('option');
+                opt.value = comp;
+                const shortLabel = comp.length > 65 ? comp.substring(0, 65) + '...' : comp;
+                opt.textContent = `Komposisi ${idx + 1}: ${shortLabel}`;
+                compSelect.appendChild(opt);
+            });
+
+            // Atur Rasio default dari template (misal "4:5 portrait" -> "4:5")
+            const ratioSelect = document.getElementById('select-ratio');
+            if (currentTemplate.ratio) {
+                const matchedRatio = currentTemplate.ratio.match(/(\d+:\d+)/);
+                if (matchedRatio && matchedRatio[1]) {
+                    const ratioVal = matchedRatio[1];
+                    // Cek apakah opsi tersedia
+                    const exists = Array.from(ratioSelect.options).some(o => o.value === ratioVal);
+                    if (exists) {
+                        ratioSelect.value = ratioVal;
+                    }
+                }
+            }
+
+            // Atur Quality
+            document.getElementById('input-quality').value = currentTemplate.quality || '8k resolution, ultra-detailed product photography, studio lighting';
+
+            // Render input dinamis untuk feature_items
+            renderFeatureInputs(currentTemplate.feature_items || ['{{item_01}}', '{{item_02}}', '{{item_03}}']);
+
+            // Perbarui pratinjau deskripsi & prompt
+            updatePromptPreview();
+        }
+
+        /**
+         * Membuat kotak input fitur berdasarkan array feature_items dari template
+         */
+        function renderFeatureInputs(items) {
+            const container = document.getElementById('feature-items-container');
+            container.innerHTML = '';
+
+            items.forEach((itemPlaceholder, idx) => {
+                const cleanPlaceholder = itemPlaceholder.replace(/\{\{|\}\}/g, '');
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative flex items-center';
+                wrapper.innerHTML = `
+                    <input type="text" 
+                        data-feature-input="true"
+                        oninput="updatePromptPreview()" 
+                        placeholder="Fitur ${idx + 1} (${cleanPlaceholder})" 
+                        class="w-full bg-slate-900/90 border border-slate-700/80 focus:border-brand-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition-all">
+                `;
+                container.appendChild(wrapper);
+            });
+        }
+
+        /**
+         * Menambah kolom input fitur baru secara manual
+         */
+        function addFeatureInput() {
+            const container = document.getElementById('feature-items-container');
+            const count = container.querySelectorAll('input').length + 1;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'relative flex items-center';
+            wrapper.innerHTML = `
+                <input type="text" 
+                    data-feature-input="true"
+                    oninput="updatePromptPreview()" 
+                    placeholder="Fitur ${count} (item_0${count})" 
+                    class="w-full bg-slate-900/90 border border-slate-700/80 focus:border-brand-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition-all">
+            `;
+            container.appendChild(wrapper);
+        }
+
+        /**
+         * Mengisi form dengan contoh data produk agar user bisa langsung mencoba
+         */
+        function fillSampleData() {
+            document.getElementById('input-subject').value = 'Smartwatch titanium olahraga premium dengan tali fluoroelastomer oranye dan layar AMOLED melengkung';
+            document.getElementById('input-headline').value = 'APEX ULTRA PRO';
+            document.getElementById('input-subheadline').value = 'ENGINEERED FOR EXTREME ADVENTURE';
+
+            const sampleFeatures = ['100M WATERPROOF', '14-DAY BATTERY', 'DUAL-GPS TITANIUM'];
+            const featureInputs = document.querySelectorAll('[data-feature-input="true"]');
+            featureInputs.forEach((input, i) => {
+                if (sampleFeatures[i]) {
+                    input.value = sampleFeatures[i];
+                }
+            });
+
+            updatePromptPreview();
+            showToast('Contoh data produk berhasil diisi!', 'info');
+        }
+
+        /**
+         * Menggabungkan seluruh variabel template menjadi prompt terstruktur
+         */
+        function updatePromptPreview() {
+            const subject = document.getElementById('input-subject').value.trim();
+            const headline = document.getElementById('input-headline').value.trim();
+            const subheadline = document.getElementById('input-subheadline').value.trim();
+            const background = document.getElementById('select-background').value;
+            const layout = document.getElementById('select-layout').value;
+            const composition = document.getElementById('select-composition').value;
+            const ratio = document.getElementById('select-ratio').value;
+            const quality = document.getElementById('input-quality').value.trim();
+
+            // Update teks deskripsi lengkap di bawah dropdown layout & composition
+            document.getElementById('layout-description-preview').textContent = layout || '-';
+            document.getElementById('composition-description-preview').textContent = composition || '-';
+            document.getElementById('render-ratio-badge').textContent = ratio;
+
+            // Ambil semua nilai fitur yang diisi
+            const featureInputs = Array.from(document.querySelectorAll('[data-feature-input="true"]'))
+                .map(el => el.value.trim())
+                .filter(val => val.length > 0);
+
+            // Susun prompt terstruktur untuk Gemini Image Generation
+            let promptParts = [];
+
+            if (layout) {
+                promptParts.push(`Layout & Design Concept: ${layout}`);
+            }
+
+            promptParts.push(`Hero Subject: ${subject || '[Describe your main product/subject here]'}`);
+
+            if (headline || subheadline) {
+                let textInstructions = 'Typography & Text Elements: ';
+                if (headline) textInstructions += `Main bold headline reading "${headline}". `;
+                if (subheadline) textInstructions += `Secondary subheadline reading "${subheadline}". `;
+                promptParts.push(textInstructions.trim());
+            }
+
+            if (featureInputs.length > 0) {
+                const formattedBadges = featureInputs.map(f => `"${f}"`).join(', ');
+                promptParts.push(`Feature Callout Badges: Clean modern UI badges displaying ${formattedBadges}.`);
+            }
+
+            if (background) {
+                promptParts.push(`Background Environment: ${background}.`);
+            }
+
+            if (composition) {
+                promptParts.push(`Camera & Lighting Composition: ${composition}.`);
+            }
+
+            if (quality) {
+                promptParts.push(`Visual Quality & Style: ${quality}.`);
+            }
+
+            document.getElementById('compiled-prompt-preview').value = promptParts.join('\n\n');
+        }
+
+        /**
+         * Menyalin prompt ke clipboard menggunakan execCommand (aman di dalam iframe)
+         */
+        function copyPromptToClipboard() {
+            const textarea = document.getElementById('compiled-prompt-preview');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast('Prompt berhasil disalin ke clipboard.', 'success');
+            } catch (err) {
+                showToast('Gagal menyalin prompt.', 'error');
+            }
+        }
+
+        /**
+         * Fetch dengan Exponential Backoff untuk ketahanan terhadap throttling API
+         */
+        async function fetchWithRetry(url, options, maxRetries = 4) {
+            const delays = [1000, 2000, 4000, 8000];
+            for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                    if (response.status === 429 || response.status >= 500) {
+                        if (attempt < maxRetries) {
+                            await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+                            continue;
+                        }
+                    }
+                    const errBody = await response.text();
+                    throw new Error(`API Error (${response.status}): ${errBody}`);
+                } catch (err) {
+                    if (attempt === maxRetries) throw err;
+                    await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+                }
+            }
+        }
+
+        /**
+         * Memanggil Gemini 3.1 Flash Image (Nano Banana) untuk menghasilkan gambar poster
+         */
+        async function generateImage() {
+            const subject = document.getElementById('input-subject').value.trim();
+            const compiledPrompt = document.getElementById('compiled-prompt-preview').value.trim();
+            const aspectRatio = document.getElementById('select-ratio').value || "4:5";
+
+            if (!subject && compiledPrompt.includes('[Describe your main product/subject here]')) {
+                showToast('Harap isi "Subjek Utama / Produk" terlebih dahulu atau klik "Isi Contoh Produk".', 'warning');
+                document.getElementById('input-subject').focus();
+                return;
+            }
+
+            // UI Loading state
+            const btnGenerate = document.getElementById('btn-generate');
+            const loadingState = document.getElementById('loading-state');
+            const emptyState = document.getElementById('empty-state');
+
+            btnGenerate.disabled = true;
+            btnGenerate.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Sedang Merender...</span>`;
+            lucide.createIcons({ root: btnGenerate });
+
+            emptyState.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+
+            try {
+                // Menggunakan gemini-3.1-flash-image karena template poster memiliki elemen tipografi (headline, subheadline, feature badges)
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{
+                        role: 'user',
+                        parts: [{ text: compiledPrompt }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ['IMAGE'],
+                        imageConfig: {
+                            aspectRatio: aspectRatio
+                        }
+                    }
+                };
+
+                const result = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const part = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+
+                if (!part || !part.inlineData?.data) {
+                    throw new Error('Model tidak mengembalikan data gambar yang valid. Coba ubah deskripsi prompt.');
+                }
+
+                const mimeType = part.inlineData.mimeType || 'image/png';
+                const imageUrl = `data:${mimeType};base64,${part.inlineData.data}`;
+
+                displayGeneratedImage(imageUrl, subject || 'Poster Produk');
+                addToHistory(imageUrl, subject || 'Poster Produk', aspectRatio);
+                showToast('Gambar poster berhasil dibuat!', 'success');
+
+            } catch (error) {
+                console.error('Kesalahan saat generate gambar:', error);
+                showToast(`Gagal membuat gambar: ${error.message}`, 'error');
+                if (!currentImageBase64) {
+                    emptyState.classList.remove('hidden');
+                }
+            } finally {
+                loadingState.classList.add('hidden');
+                btnGenerate.disabled = false;
+                btnGenerate.innerHTML = `<i data-lucide="sparkles" class="w-5 h-5"></i><span>Buat Gambar Sekarang</span>`;
+                lucide.createIcons({ root: btnGenerate });
+            }
+        }
+
+        /**
+         * Menampilkan gambar yang telah berhasil dirender pada viewport utama
+         */
+        function displayGeneratedImage(imageUrl, title) {
+            currentImageBase64 = imageUrl;
+            const imgEl = document.getElementById('generated-image');
+            const modalImgEl = document.getElementById('modal-image');
+            const actionsEl = document.getElementById('result-actions');
+            const emptyState = document.getElementById('empty-state');
+
+            imgEl.src = imageUrl;
+            imgEl.alt = title;
+            modalImgEl.src = imageUrl;
+
+            emptyState.classList.add('hidden');
+            imgEl.classList.remove('hidden');
+            actionsEl.classList.remove('hidden');
+        }
+
+        /**
+         * Menyimpan hasil render ke galeri riwayat sesi
+         */
+        function addToHistory(imageUrl, title, ratio) {
+            generationHistory.unshift({ imageUrl, title, ratio, timestamp: new Date() });
+            if (generationHistory.length > 8) {
+                generationHistory.pop();
+            }
+
+            const section = document.getElementById('history-section');
+            const grid = document.getElementById('history-grid');
+            const countEl = document.getElementById('history-count');
+
+            section.classList.remove('hidden');
+            countEl.textContent = `${generationHistory.length} gambar`;
+            grid.innerHTML = '';
+
+            generationHistory.forEach((item) => {
+                const thumbBtn = document.createElement('button');
+                thumbBtn.type = 'button';
+                thumbBtn.title = item.title;
+                thumbBtn.onclick = () => {
+                    displayGeneratedImage(item.imageUrl, item.title);
+                    document.getElementById('render-ratio-badge').textContent = item.ratio;
+                };
+                thumbBtn.className = 'aspect-square rounded-lg overflow-hidden border border-slate-700 hover:border-brand-500 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500';
+                thumbBtn.innerHTML = `<img src="${item.imageUrl}" alt="${item.title}" class="w-full h-full object-cover">`;
+                grid.appendChild(thumbBtn);
+            });
+        }
+
+        /**
+         * Mengunduh gambar yang sedang ditampilkan sebagai file PNG
+         */
+        function downloadGeneratedImage() {
+            if (!currentImageBase64) return;
+            const link = document.createElement('a');
+            const subjectSlug = (document.getElementById('input-subject').value.trim() || 'poster-ai')
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .substring(0, 30);
+            link.href = currentImageBase64;
+            link.download = `${subjectSlug}-${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Mengunduh gambar PNG...', 'success');
+        }
+
+        /**
+         * Kontrol Modal Layar Penuh
+         */
+        function openFullscreenModal() {
+            if (!currentImageBase64) return;
+            document.getElementById('fullscreen-modal').classList.remove('hidden');
+        }
+
+        function closeFullscreenModal() {
+            document.getElementById('fullscreen-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
