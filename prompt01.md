@@ -23,12 +23,12 @@ Core objectives:
 
 ## Product context
 
-- Application name: AI Product Image Studio
-- Application description: A focused AI-powered product image creation workspace for composing reusable visual prompts and producing premium commercial product imagery through capabilities genuinely available in the Gemini Canvas environment.
-- Target users: E-commerce business owners, product marketers, social media content creators, and brand/design teams who need consistent, high-quality product campaign visuals.
-- Primary use case: Create and refine reusable, dynamic prompts for premium product advertising images, including social media campaign and Instagram feed creatives, with configurable product subject, campaign direction, visual style, composition, lighting, color palette, and aspect ratio.
-- Language: Indonesian (Bahasa Indonesia) for the application interface and user-facing guidance; keep technical identifiers and prompt variables in English where appropriate.
-- Preferred visual direction: Premium minimalist editorial aesthetic with refined product-art direction, clean composition, strong visual hierarchy, generous whitespace, sophisticated typography, controlled lighting, and polished commercial photography. The interface should feel modern and professional without copying another brand's proprietary UI.
+- Application name: Apple The Exchange TRX Instagram Feed Studio
+- Application description: A specialized AI image-prompting workspace for creating premium Instagram feed visuals featuring Apple products for the Apple retail presence at The Exchange TRX, Kuala Lumpur, Malaysia. The application helps users produce consistent product-focused campaign artwork, promotional creatives, launch announcements, and editorial-style social content.
+- Target users: The social media, marketing, and creative-content team responsible for planning and producing Instagram feed content for the Apple product retail presence at The Exchange TRX in Kuala Lumpur, Malaysia.
+- Primary use case: Create and refine reusable, dynamic prompts for Instagram feed images featuring Apple products and retail campaigns. Support product spotlights, feature highlights, new-product announcements, promotional campaigns, seasonal content, and store-related content, with configurable product subject, campaign objective, visual direction, composition, lighting, color palette, background, and feed aspect ratio.
+- Language: Indonesian (Bahasa Indonesia) for application controls and guidance. Allow the user to define the language of image text and campaign copy separately, with English and Bahasa Malaysia as practical content options for the Kuala Lumpur audience. Do not automatically place text inside generated images unless the user requests it.
+- Preferred visual direction: Premium Apple-inspired editorial minimalism: product-first composition, precise details, clean geometry, generous negative space, refined typography, subtle gradients, sophisticated studio lighting, and restrained colors. Keep product appearance accurate to the supplied reference and avoid altering logos, ports, camera layouts, finishes, or other identifying product details. Use a polished retail-campaign aesthetic suitable for Instagram. Do not imply that the application or its output is officially endorsed, operated, or published by Apple unless the user explicitly confirms authorization.
 
 The application is intended to run within Gemini Canvas. The user expects to use the AI capabilities available in that environment without configuring a separate API key.
 
