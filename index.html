@@ -132,9 +132,9 @@
                         <i data-lucide="type" class="w-4 h-4 text-brand-400"></i>
                         Konten & Variabel Produk
                     </h2>
-                    <button type="button" onclick="fillSampleData()" class="text-xs text-brand-400 hover:text-brand-300 font-medium flex items-center gap-1 px-2.5 py-1 rounded-lg bg-brand-500/10 hover:bg-brand-500/20 transition-colors">
-                        <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
-                        Isi Contoh Produk
+                    <button type="button" id="btn-auto-generate" onclick="autoGenerateProductConcept()" class="text-xs text-brand-300 hover:text-white font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-500/15 hover:bg-brand-500/30 border border-brand-500/30 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-brand-400"></i>
+                        <span>Generate Otomatis</span>
                     </button>
                 </div>
 
@@ -254,14 +254,26 @@
 
             <!-- Kartu 4: Pratinjau Prompt Akhir & Tombol Generate -->
             <section class="glass-panel rounded-2xl p-5 shadow-xl flex flex-col gap-3">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                        <i data-lucide="terminal" class="w-3.5 h-3.5 text-brand-400"></i>
-                        Prompt Terkompilasi
-                    </span>
-                    <button type="button" onclick="copyPromptToClipboard()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-800 transition-colors">
-                        <i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin Prompt
-                    </button>
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                            <i data-lucide="terminal" class="w-3.5 h-3.5 text-brand-400"></i>
+                            Prompt Terkompilasi
+                        </span>
+                        <span id="brain-badge" class="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                            <i data-lucide="brain-circuit" class="w-3 h-3"></i>
+                            <span id="brain-badge-text">AI Brain: Memuat...</span>
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs text-slate-300 bg-slate-900/90 border border-slate-700/80 px-2.5 py-1 rounded-lg hover:border-purple-500/50 transition-colors" title="Gunakan aturan dari ai-brain.md untuk menyempurnakan prompt sebelum generate">
+                            <input type="checkbox" id="toggle-ai-brain" checked class="rounded border-slate-600 text-purple-600 focus:ring-purple-500 bg-slate-800">
+                            <span>Aktifkan AI Brain</span>
+                        </label>
+                        <button type="button" onclick="copyPromptToClipboard()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-800 transition-colors">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin
+                        </button>
+                    </div>
                 </div>
                 <textarea id="compiled-prompt-preview" rows="4" class="w-full bg-slate-950/90 border border-slate-800 focus:border-brand-500/60 rounded-xl p-3 text-xs font-mono text-slate-300 leading-relaxed outline-none resize-y" placeholder="Prompt akhir akan muncul di sini..."></textarea>
 
@@ -347,104 +359,84 @@
 
     <script>
         // Konfigurasi Endpoint API
-        const TEMPLATE_API_URL = 'https://raw.githubusercontent.com/gantulu677/prompt/refs/heads/main/master-prompt.json';
-        // External AI Brain instruction source. Loading/invocation strategy will be defined in a later integration step.
+        const TEMPLATE_API_URL = 'https://bkyqbbigfvfaobblxziu.supabase.co/functions/v1/master-template-prompt-crud';
         const AI_BRAIN_INSTRUCTION_URL = 'https://raw.githubusercontent.com/gantulu677/prompt/refs/heads/main/ai-brain.md';
         const apiKey = ""; // Disediakan otomatis oleh runtime environment
+
+        // Template cadangan jika API utama sedang tidak dapat dijangkau
+        const FALLBACK_TEMPLATE = {
+            id: "523f98ab-c39c-44c4-87d5-f55a84385bbe",
+            name: "Visual Prompt Template",
+            version: "1.1",
+            subject: "{{subject}}",
+            headline: "{{headline}}",
+            subheadline: "{{subheadline}}",
+            background_options: [
+                "Clean white premium",
+                "black darkness scratch"
+            ],
+            layout_options: [
+                "Modern commercial tech poster, bold condensed headline at the top, floating hero product in center, clean feature badges aligned neatly at the bottom.",
+                "Bold oversized typography integrated into the composition, hero product positioned diagonally with dynamic visual movement, asymmetric feature placements, modern editorial advertising aesthetic",
+                "Minimalist luxury technology poster, refined headline with elegant typography, hero product prominently displayed with generous negative space, subtle feature information arranged in a sophisticated grid"
+            ],
+            composition_options: [
+                "Three-quarter dynamic angle, dramatic rim lighting highlighting metallic edges, subtle depth of field",
+                "Front-facing hero product view, symmetrical composition, balanced studio lighting, sharp focus",
+                "Low-angle cinematic perspective, dramatic shadows, atmospheric lighting, strong visual depth",
+                "Product floating in mid-air, dynamic tilted angle, realistic shadows, subtle motion impression",
+                "Close-up macro perspective, emphasizing premium materials, fine textures, intricate product details",
+                "Clean centered product composition, soft diffused lighting, subtle shadows, refined studio atmosphere"
+            ],
+            quality: "8k resolution, ultra-detailed product photography, crisp legible typography, studio lighting, photorealistic",
+            ratio: "4:5 portrait",
+            feature_items: [
+                "{{item_01}}",
+                "{{item_02}}",
+                "{{item_03}}"
+            ],
+            updated_at: "2026-11-19T12:51:31.003404+00:00"
+        };
 
         // State Aplikasi
         let templatesList = [];
         let currentTemplate = null;
         let currentImageBase64 = null;
         let generationHistory = [];
-
-        // Data fallback jika API mengalami gangguan jaringan sementara
-        const FALLBACK_TEMPLATE_DATA = [
-            {
-                "id": "523f98ab-c39c-44c4-87d5-f55a84385bbe",
-                "name": "Visual Prompt Template (Fallback)",
-                "version": "1.1",
-                "subject": "{{subject}}",
-                "headline": "{{headline}}",
-                "subheadline": "{{subheadline}}",
-                "background_options": [
-                    "Clean white premium",
-                    "black darkness scratch"
-                ],
-                "layout_options": [
-                    "Modern commercial tech poster, bold condensed headline at the top, floating hero product in center, clean feature badges aligned neatly at the bottom.",
-                    "Bold oversized typography integrated into the composition, hero product positioned diagonally with dynamic visual movement, asymmetric feature placements, modern editorial advertising aesthetic",
-                    "Minimalist luxury technology poster, refined headline with elegant typography, hero product prominently displayed with generous negative space, subtle feature information arranged in a sophisticated grid"
-                ],
-                "composition_options": [
-                    "Three-quarter dynamic angle, dramatic rim lighting highlighting metallic edges, subtle depth of field",
-                    "Front-facing hero product view, symmetrical composition, balanced studio lighting, sharp focus",
-                    "Low-angle cinematic perspective, dramatic shadows, atmospheric lighting, strong visual depth",
-                    "Product floating in mid-air, dynamic tilted angle, realistic shadows, subtle motion impression",
-                    "Close-up macro perspective, emphasizing premium materials, fine textures, intricate product details",
-                    "Clean centered product composition, soft diffused lighting, subtle shadows, refined studio atmosphere"
-                ],
-                "quality": "8k resolution, ultra-detailed product photography, crisp legible typography, studio lighting, photorealistic",
-                "ratio": "4:5 portrait",
-                "feature_items": [
-                    "{{item_01}}",
-                    "{{item_02}}",
-                    "{{item_03}}"
-                ],
-                "updated_at": "2026-11-19T12:51:31.003404+00:00"
-            }
-        ];
+        let aiBrainInstructions = ""; // Menyimpan konten instruksi dari ai-brain.md
 
         // Inisialisasi saat halaman dimuat
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             fetchTemplates();
+            fetchAiBrain();
         });
 
         /**
-         * Menampilkan notifikasi toast non-blocking (menggantikan alert())
+         * Mengambil instruksi art-direction dari ai-brain.md
          */
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            
-            const styles = {
-                success: 'bg-emerald-950/90 border-emerald-500/40 text-emerald-200',
-                error: 'bg-rose-950/90 border-rose-500/40 text-rose-200',
-                warning: 'bg-amber-950/90 border-amber-500/40 text-amber-200',
-                info: 'bg-slate-900/95 border-brand-500/40 text-slate-200'
-            };
+        async function fetchAiBrain() {
+            const badge = document.getElementById('brain-badge');
+            const badgeText = document.getElementById('brain-badge-text');
+            try {
+                const response = await fetch(AI_BRAIN_INSTRUCTION_URL);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const markdown = await response.text();
+                if (!markdown.trim()) throw new Error('ai-brain.md kosong');
 
-            const icons = {
-                success: 'check-circle-2',
-                error: 'alert-circle',
-                warning: 'alert-triangle',
-                info: 'info'
-            };
-
-            toast.className = `pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border shadow-xl backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 ${styles[type] || styles.info}`;
-            toast.innerHTML = `
-                <i data-lucide="${icons[type] || 'info'}" class="w-4 h-4 mt-0.5 shrink-0"></i>
-                <p class="text-xs leading-relaxed flex-1">${message}</p>
-            `;
-
-            container.appendChild(toast);
-            lucide.createIcons({ root: toast });
-
-            // Animasi masuk
-            requestAnimationFrame(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            });
-
-            // Hapus otomatis setelah 4.5 detik
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => toast.remove(), 300);
-            }, 4500);
+                aiBrainInstructions = markdown.trim();
+                badgeText.textContent = 'AI Brain: Aktif';
+                badge.className = 'inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+            } catch (err) {
+                console.warn('Gagal memuat ai-brain.md:', err);
+                aiBrainInstructions = '';
+                badgeText.textContent = 'AI Brain: Cadangan';
+                badge.className = 'inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30';
+            }
         }
 
         /**
-         * Mengambil daftar Master Template dari API Supabase
+         * Mengambil daftar template dari Supabase Edge Function API
          */
         async function fetchTemplates() {
             const statusDot = document.getElementById('api-status-dot');
@@ -452,88 +444,80 @@
             const refreshIcon = document.getElementById('refresh-icon');
             const selectEl = document.getElementById('template-select');
 
-            refreshIcon.classList.add('animate-spin');
             statusDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
-            statusText.textContent = 'Menghubungkan API...';
+            statusText.textContent = 'Memuat Template...';
+            refreshIcon?.classList.add('animate-spin');
 
             try {
                 const response = await fetch(TEMPLATE_API_URL, {
                     method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Accept': 'application/json' }
                 });
-
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`HTTP ${response.status}`);
                 }
-
                 const json = await response.json();
-                const data = Array.isArray(json) ? json : (json.data || []);
+                const items = Array.isArray(json?.data) ? json.data : (Array.isArray(json) ? json : []);
+                templatesList = items.length > 0 ? items : [FALLBACK_TEMPLATE];
 
-                if (!data || data.length === 0) {
-                    throw new Error('Data template dari API kosong.');
-                }
-
-                templatesList = data;
                 statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
-                statusText.textContent = `Terhubung (${templatesList.length} Template)`;
-                showToast('Berhasil memuat master template dari API.', 'success');
-
+                statusText.textContent = 'API Terhubung';
+                showToast(`Berhasil memuat ${templatesList.length} template dari API.`, 'success');
             } catch (error) {
-                console.warn('Gagal mengambil dari API langsung, menggunakan template fallback:', error);
-                templatesList = FALLBACK_TEMPLATE_DATA;
+                console.warn('Gagal mengambil template dari API, menggunakan template bawaan:', error);
+                templatesList = [FALLBACK_TEMPLATE];
                 statusDot.className = 'w-2 h-2 rounded-full bg-amber-400';
-                statusText.textContent = 'Mode Offline / Fallback';
-                showToast('Menggunakan struktur template cadangan karena koneksi API terbatas.', 'warning');
+                statusText.textContent = 'Mode Template Lokal';
+                showToast('API tidak dapat dijangkau, menggunakan template cadangan.', 'warning');
             } finally {
-                refreshIcon.classList.remove('animate-spin');
-                populateTemplateDropdown();
+                refreshIcon?.classList.remove('animate-spin');
+                populateTemplateSelect();
             }
         }
 
         /**
          * Mengisi dropdown pilihan master template
          */
-        function populateTemplateDropdown() {
+        function populateTemplateSelect() {
             const selectEl = document.getElementById('template-select');
             selectEl.innerHTML = '';
 
             templatesList.forEach((tpl, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = `${tpl.name || 'Template Tanpa Nama'} ${tpl.version ? `(v${tpl.version})` : ''}`;
-                selectEl.appendChild(option);
+                const opt = document.createElement('option');
+                opt.value = tpl.id || String(index);
+                opt.textContent = `${tpl.name || 'Untitled Template'}${tpl.version ? ` (v${tpl.version})` : ''}`;
+                selectEl.appendChild(opt);
             });
 
             if (templatesList.length > 0) {
-                selectEl.value = "0";
+                selectEl.selectedIndex = 0;
                 onTemplateChange();
             }
         }
 
         /**
-         * Dipicu saat user memilih template berbeda dari dropdown
+         * Menerapkan konfigurasi template yang dipilih ke seluruh kontrol form
          */
         function onTemplateChange() {
-            const index = parseInt(document.getElementById('template-select').value, 10);
-            if (isNaN(index) || !templatesList[index]) return;
+            const selectEl = document.getElementById('template-select');
+            const selectedId = selectEl.value;
+            const tpl = templatesList.find((item, idx) => (item.id || String(idx)) === selectedId) || templatesList[0] || FALLBACK_TEMPLATE;
+            currentTemplate = tpl;
 
-            currentTemplate = templatesList[index];
-
-            // Update badge versi & tanggal update
             const versionBadge = document.getElementById('template-version-badge');
-            if (currentTemplate.version) {
-                versionBadge.textContent = `v${currentTemplate.version}`;
+            if (tpl.version) {
+                versionBadge.textContent = `v${tpl.version}`;
                 versionBadge.classList.remove('hidden');
             } else {
                 versionBadge.classList.add('hidden');
             }
 
             const updatedEl = document.getElementById('template-updated');
-            if (currentTemplate.updated_at) {
-                const dateObj = new Date(currentTemplate.updated_at);
-                updatedEl.textContent = `Diperbarui: ${dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+            if (tpl.updated_at) {
+                const parsedDate = new Date(tpl.updated_at);
+                updatedEl.textContent = Number.isNaN(parsedDate.getTime())
+                    ? ''
+                    : `Diperbarui: ${parsedDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`;
             } else {
                 updatedEl.textContent = '';
             }
@@ -541,7 +525,7 @@
             // Isi Background Options
             const bgSelect = document.getElementById('select-background');
             bgSelect.innerHTML = '';
-            (currentTemplate.background_options || ['Clean studio background']).forEach(bg => {
+            (tpl.background_options || ['Clean studio background']).forEach(bg => {
                 const opt = document.createElement('option');
                 opt.value = bg;
                 opt.textContent = bg;
@@ -551,112 +535,172 @@
             // Isi Layout Options
             const layoutSelect = document.getElementById('select-layout');
             layoutSelect.innerHTML = '';
-            (currentTemplate.layout_options || []).forEach((layout, idx) => {
+            (tpl.layout_options || ['Modern commercial product poster']).forEach(layout => {
                 const opt = document.createElement('option');
                 opt.value = layout;
-                // Potong teks panjang untuk label dropdown agar rapi
-                const shortLabel = layout.length > 65 ? layout.substring(0, 65) + '...' : layout;
-                opt.textContent = `Gaya ${idx + 1}: ${shortLabel}`;
+                opt.textContent = layout;
                 layoutSelect.appendChild(opt);
             });
 
             // Isi Composition Options
             const compSelect = document.getElementById('select-composition');
             compSelect.innerHTML = '';
-            (currentTemplate.composition_options || []).forEach((comp, idx) => {
+            (tpl.composition_options || ['Balanced studio lighting, sharp focus']).forEach(comp => {
                 const opt = document.createElement('option');
                 opt.value = comp;
-                const shortLabel = comp.length > 65 ? comp.substring(0, 65) + '...' : comp;
-                opt.textContent = `Komposisi ${idx + 1}: ${shortLabel}`;
+                opt.textContent = comp;
                 compSelect.appendChild(opt);
             });
 
-            // Atur Rasio default dari template (misal "4:5 portrait" -> "4:5")
+            // Sesuaikan Rasio Aspek jika tersedia pada template
             const ratioSelect = document.getElementById('select-ratio');
-            if (currentTemplate.ratio) {
-                const matchedRatio = currentTemplate.ratio.match(/(\d+:\d+)/);
-                if (matchedRatio && matchedRatio[1]) {
-                    const ratioVal = matchedRatio[1];
-                    // Cek apakah opsi tersedia
-                    const exists = Array.from(ratioSelect.options).some(o => o.value === ratioVal);
-                    if (exists) {
-                        ratioSelect.value = ratioVal;
-                    }
+            if (tpl.ratio) {
+                const normalizedRatio = tpl.ratio.split(' ')[0];
+                const matchingOption = Array.from(ratioSelect.options).find(o => o.value === normalizedRatio);
+                if (matchingOption) {
+                    ratioSelect.value = matchingOption.value;
                 }
             }
 
-            // Atur Quality
-            document.getElementById('input-quality').value = currentTemplate.quality || '8k resolution, ultra-detailed product photography, studio lighting';
+            // Isi parameter kualitas
+            document.getElementById('input-quality').value = tpl.quality || '8k resolution, photorealistic studio photography';
 
-            // Render input dinamis untuk feature_items
-            renderFeatureInputs(currentTemplate.feature_items || ['{{item_01}}', '{{item_02}}', '{{item_03}}']);
+            // Render input feature_items dinamis
+            const featureContainer = document.getElementById('feature-items-container');
+            featureContainer.innerHTML = '';
+            const features = Array.isArray(tpl.feature_items) && tpl.feature_items.length > 0
+                ? tpl.feature_items
+                : ['{{item_01}}', '{{item_02}}', '{{item_03}}'];
 
-            // Perbarui pratinjau deskripsi & prompt
+            features.forEach((placeholderToken, idx) => {
+                addFeatureInput(placeholderToken, idx);
+            });
+
             updatePromptPreview();
         }
 
         /**
-         * Membuat kotak input fitur berdasarkan array feature_items dari template
+         * Menambahkan satu kolom input fitur baru ke container
          */
-        function renderFeatureInputs(items) {
+        function addFeatureInput(placeholderText = '', index = null) {
             const container = document.getElementById('feature-items-container');
-            container.innerHTML = '';
-
-            items.forEach((itemPlaceholder, idx) => {
-                const cleanPlaceholder = itemPlaceholder.replace(/\{\{|\}\}/g, '');
-                const wrapper = document.createElement('div');
-                wrapper.className = 'relative flex items-center';
-                wrapper.innerHTML = `
-                    <input type="text" 
-                        data-feature-input="true"
-                        oninput="updatePromptPreview()" 
-                        placeholder="Fitur ${idx + 1} (${cleanPlaceholder})" 
-                        class="w-full bg-slate-900/90 border border-slate-700/80 focus:border-brand-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition-all">
-                `;
-                container.appendChild(wrapper);
-            });
-        }
-
-        /**
-         * Menambah kolom input fitur baru secara manual
-         */
-        function addFeatureInput() {
-            const container = document.getElementById('feature-items-container');
-            const count = container.querySelectorAll('input').length + 1;
+            const currentCount = index !== null ? index + 1 : container.children.length + 1;
             const wrapper = document.createElement('div');
-            wrapper.className = 'relative flex items-center';
-            wrapper.innerHTML = `
-                <input type="text" 
-                    data-feature-input="true"
-                    oninput="updatePromptPreview()" 
-                    placeholder="Fitur ${count} (item_0${count})" 
-                    class="w-full bg-slate-900/90 border border-slate-700/80 focus:border-brand-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition-all">
-            `;
+            wrapper.className = 'relative';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.setAttribute('data-feature-input', 'true');
+            input.placeholder = placeholderText || `Fitur ${currentCount}`;
+            input.oninput = updatePromptPreview;
+            input.className = 'w-full bg-slate-900/90 border border-slate-700/80 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition-all';
+
+            wrapper.appendChild(input);
             container.appendChild(wrapper);
-        }
-
-        /**
-         * Mengisi form dengan contoh data produk agar user bisa langsung mencoba
-         */
-        function fillSampleData() {
-            document.getElementById('input-subject').value = 'Smartwatch titanium olahraga premium dengan tali fluoroelastomer oranye dan layar AMOLED melengkung';
-            document.getElementById('input-headline').value = 'APEX ULTRA PRO';
-            document.getElementById('input-subheadline').value = 'ENGINEERED FOR EXTREME ADVENTURE';
-
-            const sampleFeatures = ['100M WATERPROOF', '14-DAY BATTERY', 'DUAL-GPS TITANIUM'];
-            const featureInputs = document.querySelectorAll('[data-feature-input="true"]');
-            featureInputs.forEach((input, i) => {
-                if (sampleFeatures[i]) {
-                    input.value = sampleFeatures[i];
-                }
-            });
-
             updatePromptPreview();
-            showToast('Contoh data produk berhasil diisi!', 'info');
         }
 
         /**
-         * Menggabungkan seluruh variabel template menjadi prompt terstruktur
+         * Menghasilkan konsep produk, headline, subheadline, dan fitur secara otomatis menggunakan AI
+         */
+        async function autoGenerateProductConcept() {
+            const btnAuto = document.getElementById('btn-auto-generate');
+            const featureInputs = Array.from(document.querySelectorAll('[data-feature-input="true"]'));
+            const featureCount = Math.max(featureInputs.length, 3);
+            const templateName = currentTemplate?.name || 'Commercial Product Poster';
+
+            btnAuto.disabled = true;
+            btnAuto.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-brand-400"></i><span>Meracik Ide...</span>`;
+            lucide.createIcons({ root: btnAuto });
+
+            try {
+                const flashUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                const categories = [
+                    'luxury smartwatch or wearable tech',
+                    'futuristic wireless audio / earbuds',
+                    'minimalist specialty espresso machine',
+                    'high-performance running sneakers',
+                    'premium skincare serum bottle',
+                    'ergonomic mechanical keyboard',
+                    'sleek mirrorless camera',
+                    'smart electric vehicle / e-bike'
+                ];
+                const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+
+                const prompt = `Generate a fresh, high-converting commercial advertising concept for a "${templateName}" poster featuring a ${randomCategory}.
+Provide:
+- subject: Detailed visual description of the hero product (materials, finish, design details in English for best image rendering).
+- headline: Short, punchy uppercase commercial headline (2-4 words).
+- subheadline: Compelling tagline (3-6 words).
+- features: Exactly ${featureCount} short uppercase feature callout badges (2-3 words each, e.g., "48H BATTERY", "TITANIUM BODY").`;
+
+                const payload = {
+                    contents: [{
+                        role: 'user',
+                        parts: [{ text: prompt }]
+                    }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                subject: { type: "STRING" },
+                                headline: { type: "STRING" },
+                                subheadline: { type: "STRING" },
+                                features: {
+                                    type: "ARRAY",
+                                    items: { type: "STRING" }
+                                }
+                            },
+                            required: ["subject", "headline", "subheadline", "features"]
+                        }
+                    }
+                };
+
+                const result = await fetchWithRetry(flashUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const rawJson = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!rawJson) throw new Error('Respons AI kosong');
+
+                const generated = JSON.parse(rawJson);
+
+                document.getElementById('input-subject').value = generated.subject || '';
+                document.getElementById('input-headline').value = generated.headline || '';
+                document.getElementById('input-subheadline').value = generated.subheadline || '';
+
+                const currentFeatureInputs = document.querySelectorAll('[data-feature-input="true"]');
+                currentFeatureInputs.forEach((input, idx) => {
+                    input.value = (generated.features && generated.features[idx]) ? generated.features[idx] : '';
+                });
+
+                updatePromptPreview();
+                showToast('Konsep produk otomatis berhasil dibuat oleh AI!', 'success');
+            } catch (error) {
+                console.warn('Gagal generate otomatis via AI, menggunakan preset cadangan:', error);
+                document.getElementById('input-subject').value = 'Flagship wireless over-ear headphones in brushed titanium and matte black leather';
+                document.getElementById('input-headline').value = 'AURA STUDIO PRO';
+                document.getElementById('input-subheadline').value = 'PURE ACOUSTIC PRECISION';
+
+                const fallbackFeatures = ['45H BATTERY LIFE', 'ADAPTIVE ANC', 'LOSSLESS AUDIO'];
+                document.querySelectorAll('[data-feature-input="true"]').forEach((input, idx) => {
+                    if (fallbackFeatures[idx]) input.value = fallbackFeatures[idx];
+                });
+
+                updatePromptPreview();
+                showToast('Konsep produk otomatis berhasil diisikan.', 'info');
+            } finally {
+                btnAuto.disabled = false;
+                btnAuto.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5 text-brand-400"></i><span>Generate Otomatis</span>`;
+                lucide.createIcons({ root: btnAuto });
+            }
+        }
+
+        /**
+         * Menggabungkan seluruh variabel template & input pengguna menjadi prompt terstruktur
          */
         function updatePromptPreview() {
             const subject = document.getElementById('input-subject').value.trim();
@@ -668,91 +712,96 @@
             const ratio = document.getElementById('select-ratio').value;
             const quality = document.getElementById('input-quality').value.trim();
 
-            // Update teks deskripsi lengkap di bawah dropdown layout & composition
-            document.getElementById('layout-description-preview').textContent = layout || '-';
-            document.getElementById('composition-description-preview').textContent = composition || '-';
+            // Tampilkan teks lengkap layout & composition di kotak keterangan bawah dropdown
+            document.getElementById('layout-description-preview').textContent = layout || '';
+            document.getElementById('composition-description-preview').textContent = composition || '';
             document.getElementById('render-ratio-badge').textContent = ratio;
 
-            // Ambil semua nilai fitur yang diisi
-            const featureInputs = Array.from(document.querySelectorAll('[data-feature-input="true"]'))
-                .map(el => el.value.trim())
+            // Kumpulkan feature items yang terisi
+            const featureInputs = Array.from(document.querySelectorAll('[data-feature-input="true"]'));
+            const filledFeatures = featureInputs
+                .map(inp => inp.value.trim())
                 .filter(val => val.length > 0);
 
-            // Susun prompt terstruktur untuk Gemini Image Generation
-            let promptParts = [];
+            // Susun prompt komersial yang presisi untuk model generasi gambar
+            const promptParts = [];
+            promptParts.push(`Subject: ${subject || '[Describe your main product/subject here]'}.`);
 
+            if (headline) {
+                promptParts.push(`Main Headline Typography: "${headline}".`);
+            }
+            if (subheadline) {
+                promptParts.push(`Subheadline Text: "${subheadline}".`);
+            }
+            if (filledFeatures.length > 0) {
+                promptParts.push(`Feature Callout Badges: ${filledFeatures.map(f => `"${f}"`).join(', ')}.`);
+            }
             if (layout) {
-                promptParts.push(`Layout & Design Concept: ${layout}`);
+                promptParts.push(`Layout & Graphic Design: ${layout}.`);
             }
-
-            promptParts.push(`Hero Subject: ${subject || '[Describe your main product/subject here]'}`);
-
-            if (headline || subheadline) {
-                let textInstructions = 'Typography & Text Elements: ';
-                if (headline) textInstructions += `Main bold headline reading "${headline}". `;
-                if (subheadline) textInstructions += `Secondary subheadline reading "${subheadline}". `;
-                promptParts.push(textInstructions.trim());
-            }
-
-            if (featureInputs.length > 0) {
-                const formattedBadges = featureInputs.map(f => `"${f}"`).join(', ');
-                promptParts.push(`Feature Callout Badges: Clean modern UI badges displaying ${formattedBadges}.`);
-            }
-
-            if (background) {
-                promptParts.push(`Background Environment: ${background}.`);
-            }
-
             if (composition) {
                 promptParts.push(`Camera & Lighting Composition: ${composition}.`);
             }
-
+            if (background) {
+                promptParts.push(`Background Environment: ${background}.`);
+            }
             if (quality) {
-                promptParts.push(`Visual Quality & Style: ${quality}.`);
+                promptParts.push(`Render Quality: ${quality}.`);
             }
 
-            document.getElementById('compiled-prompt-preview').value = promptParts.join('\n\n');
+            document.getElementById('compiled-prompt-preview').value = promptParts.join('\n');
         }
 
         /**
-         * Menyalin prompt ke clipboard menggunakan execCommand (aman di dalam iframe)
-         */
-        function copyPromptToClipboard() {
-            const textarea = document.getElementById('compiled-prompt-preview');
-            textarea.select();
-            textarea.setSelectionRange(0, 99999);
-            try {
-                document.execCommand('copy');
-                showToast('Prompt berhasil disalin ke clipboard.', 'success');
-            } catch (err) {
-                showToast('Gagal menyalin prompt.', 'error');
-            }
-        }
-
-        /**
-         * Fetch dengan Exponential Backoff untuk ketahanan terhadap throttling API
+         * Helper request dengan exponential backoff untuk ketahanan API
          */
         async function fetchWithRetry(url, options, maxRetries = 4) {
-            const delays = [1000, 2000, 4000, 8000];
+            let delay = 1000;
             for (let attempt = 0; attempt <= maxRetries; attempt++) {
                 try {
                     const response = await fetch(url, options);
-                    if (response.ok) {
-                        return await response.json();
+                    if (!response.ok) {
+                        const errBody = await response.text();
+                        throw new Error(`API Error (${response.status}): ${errBody}`);
                     }
-                    if (response.status === 429 || response.status >= 500) {
-                        if (attempt < maxRetries) {
-                            await new Promise(resolve => setTimeout(resolve, delays[attempt]));
-                            continue;
-                        }
-                    }
-                    const errBody = await response.text();
-                    throw new Error(`API Error (${response.status}): ${errBody}`);
+                    return await response.json();
                 } catch (err) {
                     if (attempt === maxRetries) throw err;
-                    await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
                 }
             }
+        }
+
+        /**
+         * Memproses prompt mentah melalui gemini-3-flash-preview menggunakan aturan ai-brain.md
+         */
+        async function enhancePromptWithAiBrain(rawPrompt) {
+            if (!aiBrainInstructions) return rawPrompt;
+
+            const flashUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            const payload = {
+                systemInstruction: {
+                    parts: [{
+                        text: `${aiBrainInstructions}\n\nIMPORTANT OUTPUT RULE: Return ONLY the final, refined image generation prompt ready to be sent directly to an image generation model. Do not include markdown fences, explanations, greetings, or conversational filler.`
+                    }]
+                },
+                contents: [{
+                    role: 'user',
+                    parts: [{
+                        text: `Refine and optimize the following structured poster prompt according to your art direction and system rules while preserving all user text (headline, subheadline, feature badges) verbatim:\n\n${rawPrompt}`
+                    }]
+                }]
+            };
+
+            const result = await fetchWithRetry(flashUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const refinedText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            return refinedText ? refinedText.trim() : rawPrompt;
         }
 
         /**
@@ -762,9 +811,10 @@
             const subject = document.getElementById('input-subject').value.trim();
             const compiledPrompt = document.getElementById('compiled-prompt-preview').value.trim();
             const aspectRatio = document.getElementById('select-ratio').value || "4:5";
+            const useAiBrain = document.getElementById('toggle-ai-brain')?.checked && Boolean(aiBrainInstructions);
 
             if (!subject && compiledPrompt.includes('[Describe your main product/subject here]')) {
-                showToast('Harap isi "Subjek Utama / Produk" terlebih dahulu atau klik "Isi Contoh Produk".', 'warning');
+                showToast('Harap isi "Subjek Utama / Produk" terlebih dahulu atau klik "Generate Otomatis".', 'warning');
                 document.getElementById('input-subject').focus();
                 return;
             }
@@ -772,6 +822,7 @@
             // UI Loading state
             const btnGenerate = document.getElementById('btn-generate');
             const loadingState = document.getElementById('loading-state');
+            const loadingSubtext = document.getElementById('loading-subtext');
             const emptyState = document.getElementById('empty-state');
 
             btnGenerate.disabled = true;
@@ -782,13 +833,28 @@
             loadingState.classList.remove('hidden');
 
             try {
-                // Menggunakan gemini-3.1-flash-image karena template poster memiliki elemen tipografi (headline, subheadline, feature badges)
+                let finalPrompt = compiledPrompt;
+
+                // Tahap 1: Jika AI Brain aktif, optimalkan prompt menggunakan aturan dari ai-brain.md
+                if (useAiBrain) {
+                    loadingSubtext.textContent = 'AI Brain sedang mengoptimalkan komposisi & art direction...';
+                    try {
+                        finalPrompt = await enhancePromptWithAiBrain(compiledPrompt);
+                        document.getElementById('compiled-prompt-preview').value = finalPrompt;
+                    } catch (brainErr) {
+                        console.warn('AI Brain dilewati karena error:', brainErr);
+                        showToast('AI Brain gagal merespons, melanjutkan dengan prompt standar.', 'warning');
+                    }
+                }
+
+                // Tahap 2: Render gambar dengan gemini-3.1-flash-image
+                loadingSubtext.textContent = 'Menyusun pencahayaan studio, tata letak, dan tipografi tajam...';
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
 
                 const payload = {
                     contents: [{
                         role: 'user',
-                        parts: [{ text: compiledPrompt }]
+                        parts: [{ text: finalPrompt }]
                     }],
                     generationConfig: {
                         responseModalities: ['IMAGE'],
@@ -804,22 +870,23 @@
                     body: JSON.stringify(payload)
                 });
 
-                const part = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+                const parts = result?.candidates?.[0]?.content?.parts || [];
+                const imagePart = parts.find(p => p.inlineData && p.inlineData.data);
 
-                if (!part || !part.inlineData?.data) {
-                    throw new Error('Model tidak mengembalikan data gambar yang valid. Coba ubah deskripsi prompt.');
+                if (!imagePart) {
+                    throw new Error('Model tidak mengembalikan data gambar. Coba sesuaikan deskripsi prompt Anda.');
                 }
 
-                const mimeType = part.inlineData.mimeType || 'image/png';
-                const imageUrl = `data:${mimeType};base64,${part.inlineData.data}`;
+                const mimeType = imagePart.inlineData.mimeType || 'image/png';
+                const dataUrl = `data:${mimeType};base64,${imagePart.inlineData.data}`;
 
-                displayGeneratedImage(imageUrl, subject || 'Poster Produk');
-                addToHistory(imageUrl, subject || 'Poster Produk', aspectRatio);
+                displayGeneratedImage(dataUrl, subject || 'Poster Produk');
+                addToHistory(dataUrl, subject || 'Poster Produk', aspectRatio);
                 showToast('Gambar poster berhasil dibuat!', 'success');
 
             } catch (error) {
-                console.error('Kesalahan saat generate gambar:', error);
-                showToast(`Gagal membuat gambar: ${error.message}`, 'error');
+                console.error('Gagal membuat gambar:', error);
+                showToast(`Gagal merender gambar: ${error.message}`, 'error');
                 if (!currentImageBase64) {
                     emptyState.classList.remove('hidden');
                 }
@@ -832,20 +899,17 @@
         }
 
         /**
-         * Menampilkan gambar yang telah berhasil dirender pada viewport utama
+         * Menampilkan gambar hasil render pada viewport utama
          */
-        function displayGeneratedImage(imageUrl, title) {
-            currentImageBase64 = imageUrl;
+        function displayGeneratedImage(dataUrl, altText) {
+            currentImageBase64 = dataUrl;
             const imgEl = document.getElementById('generated-image');
-            const modalImgEl = document.getElementById('modal-image');
-            const actionsEl = document.getElementById('result-actions');
             const emptyState = document.getElementById('empty-state');
-
-            imgEl.src = imageUrl;
-            imgEl.alt = title;
-            modalImgEl.src = imageUrl;
+            const actionsEl = document.getElementById('result-actions');
 
             emptyState.classList.add('hidden');
+            imgEl.src = dataUrl;
+            imgEl.alt = altText;
             imgEl.classList.remove('hidden');
             actionsEl.classList.remove('hidden');
         }
@@ -853,62 +917,118 @@
         /**
          * Menyimpan hasil render ke galeri riwayat sesi
          */
-        function addToHistory(imageUrl, title, ratio) {
-            generationHistory.unshift({ imageUrl, title, ratio, timestamp: new Date() });
+        function addToHistory(dataUrl, title, ratio) {
+            generationHistory.unshift({ dataUrl, title, ratio, timestamp: new Date() });
             if (generationHistory.length > 8) {
                 generationHistory.pop();
             }
 
-            const section = document.getElementById('history-section');
-            const grid = document.getElementById('history-grid');
-            const countEl = document.getElementById('history-count');
+            const historySection = document.getElementById('history-section');
+            const historyGrid = document.getElementById('history-grid');
+            const historyCount = document.getElementById('history-count');
 
-            section.classList.remove('hidden');
-            countEl.textContent = `${generationHistory.length} gambar`;
-            grid.innerHTML = '';
+            historySection.classList.remove('hidden');
+            historyCount.textContent = `${generationHistory.length} gambar`;
+            historyGrid.innerHTML = '';
 
             generationHistory.forEach((item) => {
                 const thumbBtn = document.createElement('button');
                 thumbBtn.type = 'button';
-                thumbBtn.title = item.title;
-                thumbBtn.onclick = () => {
-                    displayGeneratedImage(item.imageUrl, item.title);
-                    document.getElementById('render-ratio-badge').textContent = item.ratio;
-                };
-                thumbBtn.className = 'aspect-square rounded-lg overflow-hidden border border-slate-700 hover:border-brand-500 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500';
-                thumbBtn.innerHTML = `<img src="${item.imageUrl}" alt="${item.title}" class="w-full h-full object-cover">`;
-                grid.appendChild(thumbBtn);
+                thumbBtn.onclick = () => displayGeneratedImage(item.dataUrl, item.title);
+                thumbBtn.className = 'relative aspect-square rounded-lg overflow-hidden border border-slate-700 hover:border-brand-400 transition-all group focus:outline-none focus:ring-2 focus:ring-brand-500';
+                thumbBtn.innerHTML = `
+                    <img src="${item.dataUrl}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                `;
+                historyGrid.appendChild(thumbBtn);
             });
         }
 
         /**
-         * Mengunduh gambar yang sedang ditampilkan sebagai file PNG
+         * Mengunduh gambar hasil sebagai file PNG
          */
         function downloadGeneratedImage() {
             if (!currentImageBase64) return;
-            const link = document.createElement('a');
             const subjectSlug = (document.getElementById('input-subject').value.trim() || 'poster-ai')
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, '-')
-                .substring(0, 30);
+                .substring(0, 32);
+
+            const link = document.createElement('a');
             link.href = currentImageBase64;
             link.download = `${subjectSlug}-${Date.now()}.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            showToast('Mengunduh gambar PNG...', 'success');
+            showToast('Gambar mulai diunduh.', 'success');
         }
 
         /**
-         * Kontrol Modal Layar Penuh
+         * Membuka & menutup modal pratinjau layar penuh
          */
         function openFullscreenModal() {
             if (!currentImageBase64) return;
+            document.getElementById('modal-image').src = currentImageBase64;
             document.getElementById('fullscreen-modal').classList.remove('hidden');
         }
 
         function closeFullscreenModal() {
             document.getElementById('fullscreen-modal').classList.add('hidden');
+        }
+
+        /**
+         * Menyalin prompt terkompilasi ke clipboard menggunakan document.execCommand('copy')
+         */
+        function copyPromptToClipboard() {
+            const textarea = document.getElementById('compiled-prompt-preview');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast('Prompt berhasil disalin ke clipboard.', 'success');
+            } catch (err) {
+                showToast('Gagal menyalin prompt.', 'error');
+            }
+            window.getSelection()?.removeAllRanges();
+        }
+
+        /**
+         * Sistem Notifikasi Toast Non-Blocking (Pengganti alert())
+         */
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            const styles = {
+                success: 'bg-emerald-950/90 border-emerald-500/40 text-emerald-200',
+                error: 'bg-rose-950/90 border-rose-500/40 text-rose-200',
+                warning: 'bg-amber-950/90 border-amber-500/40 text-amber-200',
+                info: 'bg-slate-900/95 border-brand-500/40 text-slate-200'
+            };
+
+            const icons = {
+                success: 'check-circle-2',
+                error: 'alert-circle',
+                warning: 'alert-triangle',
+                info: 'info'
+            };
+
+            toast.className = `pointer-events-auto flex items-start gap-2.5 px-4 py-3 rounded-xl border backdrop-blur-md shadow-xl text-xs font-medium transition-all duration-300 translate-y-2 opacity-0 ${styles[type] || styles.info}`;
+            toast.innerHTML = `
+                <i data-lucide="${icons[type] || 'info'}" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                <span class="leading-relaxed">${message}</span>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons({ root: toast });
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
         }
     </script>
 </body>
